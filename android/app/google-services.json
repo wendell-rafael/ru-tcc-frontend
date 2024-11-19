@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "359443639654",
+    "project_id": "ru-tcc",
+    "storage_bucket": "ru-tcc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:359443639654:android:40521e03206415b0b12ca7",
+        "android_client_info": {
+          "package_name": "com.example.rutccc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "359443639654-i3akdm2mcal1794kt37177nfuqp7roh2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rutccc",
+            "certificate_hash": "87bb5a9ca95e9060e9a72ba94d59903cf58f5d3c"
+          }
+        },
+        {
+          "client_id": "359443639654-0s82jfn6lgd3avncif2qad3ffnhbjm3g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKoDPJ4Ju0hNvW2hGnIrzddvUjVIWphoY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "359443639654-0s82jfn6lgd3avncif2qad3ffnhbjm3g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "359443639654-4msunkip381o6b3t71kmg5ocabg72n9q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.rutccc"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
