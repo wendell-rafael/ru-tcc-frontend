@@ -16,18 +16,44 @@ class ProfileScreen extends StatelessWidget {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
-            (route) => false,
+        (route) => false,
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser; // Pega o usuário autenticado
+    final User? user =
+        FirebaseAuth.instance.currentUser; // Pega o usuário autenticado
     final gravatarUrl = user != null ? _getGravatarUrl(user.email!) : null;
     final userName = user?.displayName ?? 'Usuário'; // Nome do usuário
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xFFE65100),
+        toolbarHeight: 80.0, // Altura maior para a AppBar
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Perfil',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24, // Tamanho do texto maior
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                // Ação ao clicar no botão de editar
+                print("Editar perfil clicado");
+              },
+              icon: Icon(Icons.edit, color: Colors.white), // Ícone de editar
+              tooltip: 'Editar Perfil',
+            ),
+          ],
+        ),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -40,9 +66,8 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundImage: gravatarUrl != null
-                      ? NetworkImage(gravatarUrl)
-                      : null,
+                  backgroundImage:
+                      gravatarUrl != null ? NetworkImage(gravatarUrl) : null,
                   backgroundColor: Colors.grey[300],
                   child: gravatarUrl == null
                       ? Icon(Icons.person, size: 50, color: Colors.white)
