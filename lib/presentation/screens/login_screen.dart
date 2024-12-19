@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rutccc/presentation/screens/register_screen.dart';
-
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,6 +19,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Por favor, preencha todos os campos.')),
+      );
+      return;
+    }
+    if (!_isValidEmail(_emailController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, insira um email válido.')),
       );
       return;
     }
@@ -43,11 +48,18 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } on FirebaseAuthException catch (e) {
+      print('FirebaseAuthException code: ${e.code}'); // Log para depuração
       String errorMessage = 'Erro ao fazer login';
+
       if (e.code == 'user-not-found') {
         errorMessage = 'Usuário não encontrado. Verifique o email.';
       } else if (e.code == 'wrong-password') {
         errorMessage = 'Senha incorreta. Tente novamente.';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Formato de email inválido.';
+      } else if (e.code == 'invalid-credential') {
+        errorMessage =
+            'Credenciais inválidas. Verifique seus dados e tente novamente.';
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +70,11 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  bool _isValidEmail(String email) {
+    final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+');
+    return emailRegex.hasMatch(email);
   }
 
   @override
@@ -209,4 +226,3 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 }
-

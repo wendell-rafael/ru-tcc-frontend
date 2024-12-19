@@ -35,15 +35,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _isLoading = true;
       });
 
-      await _auth.createUserWithEmailAndPassword(
+      // Criação do usuário no Firebase
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+
+      // Atualização do nome no perfil do usuário
+      await userCredential.user!.updateDisplayName(_nameController.text.trim());
+      await userCredential.user!.reload(); // Atualiza o estado do usuário localmente
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Cadastro realizado com sucesso!')),
       );
 
+      Navigator.pop(context); // Retorna para a tela de login
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'Erro ao cadastrar usuário';
       if (e.code == 'email-already-in-use') {
@@ -65,10 +71,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   bool _isPasswordStrong(String password) {
-    final RegExp passwordExp =
-        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
+    final RegExp passwordExp = RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+    );
     return passwordExp.hasMatch(password);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   // Adicionando a imagem/logo na tela de cadastro
                   Image.asset(
-                    'assets/images/food.png',
-                    // Caminho da imagem nos assets
+                    'assets/images/logo.png',
                     height: 150, // Definindo o tamanho da imagem
                   ),
                   SizedBox(height: 24),
@@ -201,11 +208,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Por favor, insira uma senha';
                       } else if (!_isPasswordStrong(value)) {
-                        return 'A senha deve ter pelo menos 8 caracteres, uma letra\n maiúscula, e um número.';
+                        return 'A senha deve ter pelo menos 8 caracteres, uma letra maiúscula, e um número.';
                       }
                       return null;
                     },
-
                   ),
                   SizedBox(height: 16),
                   TextFormField(
