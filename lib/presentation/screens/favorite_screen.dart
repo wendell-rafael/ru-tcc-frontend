@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesScreen extends StatefulWidget {
   @override
@@ -7,22 +8,90 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<String> _favorites = []; // Lista de itens favoritos
+  List<String> _favorites = []; // Lista de itens favoritos
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites(); // Carrega os favoritos ao iniciar
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedFavorites = prefs.getStringList('favorites') ?? [];
+      setState(() {
+        _favorites = savedFavorites;
+      });
+    } catch (e) {
+      print('Erro ao carregar favoritos: $e');
+    }
+  }
+
+  Future<void> _saveFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('favorites', _favorites);
+    } catch (e) {
+      print('Erro ao salvar favoritos: $e');
+    }
+  }
 
   void _addFavorite() {
     final text = _controller.text.trim();
-    if (text.isNotEmpty && !_favorites.contains(text)) {
-      setState(() {
-        _favorites.add(text); // Adiciona o item à lista
-      });
-      _controller.clear(); // Limpa o campo de texto
+
+    if (text.isEmpty) {
+      // Exibe mensagem de erro se o campo estiver vazio
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Por favor, digite o nome de um item.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
+
+    if (_favorites.contains(text)) {
+      // Exibe mensagem de erro se o item já estiver na lista
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Esse item já está na lista de favoritos.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Adiciona o item se for válido
+    setState(() {
+      _favorites.add(text);
+    });
+    _saveFavorites(); // Salva os favoritos localmente
+    _controller.clear(); // Limpa o campo de texto
+
+    // Exibe mensagem de sucesso
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Item adicionado aos favoritos!',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   void _removeFavorite(String item) {
     setState(() {
       _favorites.remove(item); // Remove o item da lista
     });
+    _saveFavorites(); // Atualiza os favoritos salvos
   }
 
   @override
@@ -30,7 +99,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFE65100),
-        title: Text('Favoritos', style: TextStyle(fontSize: 24)),
+        title: Text('Favoritos', style: TextStyle(fontSize: 24,color: Colors.white)),
         elevation: 2,
       ),
       body: Padding(
