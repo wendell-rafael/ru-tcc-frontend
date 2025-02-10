@@ -12,22 +12,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  final _focusPassword = FocusNode();
+
   bool _isLoading = false;
   bool _obscurePassword = true;
 
   Future<void> _loginWithEmailAndPassword() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, preencha todos os campos.')),
-      );
-      return;
-    }
-    if (!_isValidEmail(_emailController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Por favor, insira um email válido.')),
-      );
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     try {
       setState(() {
@@ -59,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         errorMessage = 'Formato de email inválido.';
       } else if (e.code == 'invalid-credential') {
         errorMessage =
-            'Credenciais inválidas. Verifique seus dados e tente novamente.';
+        'Credenciais inválidas. Verifique seus dados e tente novamente.';
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -70,11 +63,6 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
     }
-  }
-
-  bool _isValidEmail(String email) {
-    final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+');
-    return emailRegex.hasMatch(email);
   }
 
   @override
@@ -90,131 +78,193 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/food.png',
-                  height: 150,
-                ),
-                SizedBox(height: 24),
-                Text(
-                  'Bem-vindo(a)!',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/food.png',
+                    height: 150,
                   ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Faça login para continuar',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
-                ),
-                SizedBox(height: 32),
-                TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: TextStyle(color: Colors.black),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xFFE65100),
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
+                  SizedBox(height: 24),
+                  Text(
+                    'Bem-vindo(a)!',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Senha',
-                    labelStyle: TextStyle(color: Colors.black),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xFFE65100),
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Colors.black,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ),
-                  obscureText: _obscurePassword,
-                ),
-                SizedBox(height: 24),
-                if (_isLoading)
-                  CircularProgressIndicator()
-                else
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFE65100),
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: _loginWithEmailAndPassword,
-                      child: Text(
-                        'Entrar',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RegisterScreen(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    "Não tem uma conta? Cadastre-se",
+                  SizedBox(height: 8),
+                  Text(
+                    'Faça login para continuar',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Color(0xFFE65100),
+                      color: Colors.black54,
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 32),
+                  _buildInputField(
+                    label: 'Email',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    onFieldSubmitted: (_) {
+                      FocusScope.of(context).requestFocus(_focusPassword);
+                    },
+                  ),
+                  _buildPasswordField(
+                    label: 'Senha',
+                    controller: _passwordController,
+                    focusNode: _focusPassword,
+                    textInputAction: TextInputAction.done,
+                  ),
+                  SizedBox(height: 24),
+                  if (_isLoading)
+                    CircularProgressIndicator()
+                  else
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFE65100),
+                          padding: EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: _loginWithEmailAndPassword,
+                        child: Text(
+                          'Entrar',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegisterScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "Não tem uma conta? Cadastre-se",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFFE65100),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    TextInputAction textInputAction = TextInputAction.next,
+    FocusNode? focusNode,
+    void Function(String)? onFieldSubmitted,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        focusNode: focusNode,
+        onFieldSubmitted: onFieldSubmitted,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.black),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Color(0xFFE65100),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor, insira $label.';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required String label,
+    required TextEditingController controller,
+    FocusNode? focusNode,
+    TextInputAction textInputAction = TextInputAction.done,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        obscureText: _obscurePassword,
+        focusNode: focusNode,
+        textInputAction: textInputAction,
+        onFieldSubmitted: (_) {
+          _loginWithEmailAndPassword();
+        },
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.black),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Color(0xFFE65100),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? Icons.visibility : Icons.visibility_off,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor, insira sua senha.';
+          }
+          if (value.length < 6) {
+            return 'A senha deve ter no mínimo 6 caracteres.';
+          }
+          return null;
+        },
       ),
     );
   }
@@ -223,6 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _focusPassword.dispose();
     super.dispose();
   }
 }
