@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rutccc/presentation/screens/profile_screen.dart';
-
 import 'favorite_screen.dart';
 import 'menu_screen.dart';
 
@@ -11,23 +10,45 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final PageController _pageController = PageController(initialPage: 0);
 
   static final List<Widget> _widgetOptions = <Widget>[
-    MenuScreen(), // Tela de Menu
-    FavoritesScreen(), // Tela de Favoritos
-    ProfileScreen(), // Tela de Perfil
+    MenuScreen(),       // Tela de Menu
+    FavoritesScreen(),  // Tela de Favoritos
+    ProfileScreen(),    // Tela de Perfil
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    _pageController.animateToPage(
+      index,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: PageView(
+        controller: _pageController,
+        children: _widgetOptions,
+        onPageChanged: _onPageChanged,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -36,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Favoritos', // Nova opção
+            label: 'Favoritos',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

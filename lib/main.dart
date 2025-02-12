@@ -11,8 +11,11 @@ import 'presentation/screens/login_screen.dart';
 import 'presentation/screens/home_screen.dart';
 import 'presentation/screens/admin_screen.dart'; // Nova tela para admin
 import 'domain/controllers/register_controller.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+
 
 void main() async {
+  tz.initializeTimeZones();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MyApp());
@@ -82,7 +85,7 @@ class MyApp extends StatelessWidget {
                       body: Center(child: CircularProgressIndicator()),
                     );
                   }
-                  debugPrint(roleSnapshot.data);
+                  print(roleSnapshot.data);
                   if (roleSnapshot.hasData && roleSnapshot.data == "admin") {
                     return AdminScreen(); // Tela de admin
                   }

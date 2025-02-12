@@ -37,7 +37,14 @@ dependencies:
   flutter_facebook_auth: ^7.1.1
   provider: ^6.1.2
   crypto: ^3.0.2
-  shared_preferences: ^2.0.15
+  shared_preferences: ^2.4.5
+  file_picker: ^5.3.3
+  permission_handler: ^10.4.3
+  firebase_storage: ^12.4.2
+  timezone: ^0.9.0
+
+
+
 
 
 
