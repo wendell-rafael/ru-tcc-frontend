@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../../domain/controllers/register_controller.dart';
+import '../screens/home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -7,271 +10,125 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _isLoading = false;
+
+  final _focusEmail = FocusNode();
+  final _focusPassword = FocusNode();
+  final _focusConfirmPassword = FocusNode();
+  final _focusDropdown = FocusNode();
+
+  String _selectedDietaryRestriction = "Nenhuma";
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_passwordController.text.trim() !=
-        _confirmPasswordController.text.trim()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('As senhas não correspondem.')),
-      );
-      return;
-    }
-
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cadastro realizado com sucesso!')),
-      );
-
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Erro ao cadastrar usuário';
-      if (e.code == 'email-already-in-use') {
-        errorMessage = 'Email já está em uso. Tente outro.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'Formato de email inválido.';
-      } else if (e.code == 'weak-password') {
-        errorMessage = 'A senha é muito fraca. Escolha uma senha mais forte.';
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  bool _isPasswordStrong(String password) {
-    final RegExp passwordExp =
-        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
-    return passwordExp.hasMatch(password);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white, // Fundo branco
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Adicionando a imagem/logo na tela de cadastro
-                  Image.asset(
-                    'assets/images/food.png',
-                    // Caminho da imagem nos assets
-                    height: 150, // Definindo o tamanho da imagem
-                  ),
-                  SizedBox(height: 24),
-                  Text(
-                    'Criar uma Conta',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Preencha seus dados para se cadastrar',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Nome',
-                      labelStyle: TextStyle(color: Colors.black),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Color(0xFFE65100), // Laranja para destaque
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira seu nome';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.black),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Color(0xFFE65100), // Laranja para destaque
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira um email válido';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: 'Senha',
-                      labelStyle: TextStyle(color: Colors.black),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Color(0xFFE65100), // Laranja para destaque
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.black,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-                    obscureText: _obscurePassword,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, insira uma senha';
-                      } else if (!_isPasswordStrong(value)) {
-                        return 'A senha deve ter pelo menos 8 caracteres, uma letra\n maiúscula, e um número.';
-                      }
-                      return null;
-                    },
+    final registerController = Provider.of<RegisterController>(context);
 
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'Confirme a Senha',
-                      labelStyle: TextStyle(color: Colors.black),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Color(0xFFE65100), // Laranja para destaque
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.black,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                    ),
-                    obscureText: _obscureConfirmPassword,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, confirme sua senha';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 24),
-                  if (_isLoading)
-                    CircularProgressIndicator()
-                  else
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFE65100), // Cor laranja
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus(); // 🔥 Fecha o teclado ao tocar fora
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.black),
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.white,
+            // Mantém o fundo branco mesmo ao rolar
+            statusBarIconBrightness:
+                Brightness.dark, // Ícones pretos na barra de status
+          ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Center(
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: kToolbarHeight + 20),
+                    Image.asset('assets/images/logo.png', height: 120),
+                    SizedBox(height: 16),
+                    _buildText('Criar uma Conta', 28, FontWeight.bold),
+                    _buildText('Preencha seus dados para se cadastrar', 16,
+                        FontWeight.normal),
+                    SizedBox(height: 24),
+                    _buildInputField('Nome', _nameController,
+                        nextFocus: _focusEmail),
+                    _buildInputField('Email', _emailController,
+                        focusNode: _focusEmail, nextFocus: _focusPassword),
+                    _buildPasswordField('Senha', _passwordController,
+                        focusNode: _focusPassword,
+                        nextFocus: _focusConfirmPassword,
+                        isConfirm: false),
+                    _buildPasswordField(
+                        'Confirme a Senha', _confirmPasswordController,
+                        focusNode: _focusConfirmPassword,
+                        nextFocus: _focusDropdown,
+                        isConfirm: true),
+                    SizedBox(height: 16),
+                    _buildDropdown(),
+                    SizedBox(height: 32), // Ajuste de espaçamento
+                    registerController.isLoading
+                        ? CircularProgressIndicator()
+                        : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFFE65100),
+                                padding: EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: () async {
+                                if (_formKey.currentState!.validate()) {
+                                  String? errorMessage =
+                                      await registerController.registerUser(
+                                    name: _nameController.text.trim(),
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text.trim(),
+                                    confirmPassword:
+                                        _confirmPasswordController.text.trim(),
+                                    dietaryRestriction:
+                                        _selectedDietaryRestriction,
+                                  );
+
+                                  if (errorMessage != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(errorMessage)),
+                                    );
+                                  } else {
+                                    // Redireciona automaticamente para HomeScreen ao concluir cadastro
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => HomeScreen()),
+                                    );
+                                  }
+                                }
+                              },
+                              child: Text(
+                                'Cadastrar',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white),
+                              ),
+                            ),
                           ),
-                        ),
-                        onPressed: _register,
-                        child: Text(
-                          'Cadastrar',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                    SizedBox(height: 24), // Espaço extra abaixo do botão
+                  ],
+                ),
               ),
             ),
           ),
@@ -280,12 +137,135 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
+  Widget _buildText(String text, double size, FontWeight weight) {
+    return Text(
+      text,
+      style: TextStyle(fontSize: size, fontWeight: weight, color: Colors.black),
+    );
+  }
+
+  Widget _buildInputField(String label, TextEditingController controller,
+      {FocusNode? focusNode, FocusNode? nextFocus}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        textInputAction:
+            nextFocus != null ? TextInputAction.next : TextInputAction.done,
+        onFieldSubmitted: (value) {
+          if (nextFocus != null) {
+            FocusScope.of(context).requestFocus(nextFocus);
+          }
+        },
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.black),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.black, width: 2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Color(0xFFE65100),
+              width: 2,
+            ),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return 'Por favor, insira $label.';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(String label, TextEditingController controller,
+      {required bool isConfirm, FocusNode? focusNode, FocusNode? nextFocus}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        textInputAction:
+            nextFocus != null ? TextInputAction.next : TextInputAction.done,
+        onFieldSubmitted: (value) {
+          if (nextFocus != null) {
+            FocusScope.of(context).requestFocus(nextFocus);
+          }
+        },
+        obscureText: isConfirm ? _obscureConfirmPassword : _obscurePassword,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.black),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.black, width: 2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Color(0xFFE65100),
+              width: 2,
+            ),
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(
+              isConfirm
+                  ? (_obscureConfirmPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off)
+                  : (_obscurePassword
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+              color: Colors.black,
+            ),
+            onPressed: () {
+              setState(() {
+                if (isConfirm) {
+                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                } else {
+                  _obscurePassword = !_obscurePassword;
+                }
+              });
+            },
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Por favor, insira sua senha.';
+          }
+          if (!isConfirm && value.length < 8) {
+            return 'A senha deve ter no mínimo 8 caracteres.';
+          }
+          if (isConfirm && value != _passwordController.text) {
+            return 'As senhas não coincidem.';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedDietaryRestriction,
+      focusNode: _focusDropdown,
+      decoration: InputDecoration(
+        labelText: 'Restrição Alimentar',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      items: ['Nenhuma', 'Vegetariano', 'Vegano']
+          .map((option) => DropdownMenuItem(value: option, child: Text(option)))
+          .toList(),
+      onChanged: (newValue) =>
+          setState(() => _selectedDietaryRestriction = newValue!),
+    );
   }
 }

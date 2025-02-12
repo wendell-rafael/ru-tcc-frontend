@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:rutccc/presentation/screens/profile_screen.dart';
-import 'favorite_screen.dart';
-import 'menu_screen.dart';
+import 'admin_crud_screen.dart';
+import 'admin_upload_csv_screen.dart';
+import 'admin_settings_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class AdminScreen extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _AdminScreenState createState() => _AdminScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _AdminScreenState extends State<AdminScreen> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController(initialPage: 0);
 
   static final List<Widget> _widgetOptions = <Widget>[
-    MenuScreen(),       // Tela de Menu
-    FavoritesScreen(),  // Tela de Favoritos
-    ProfileScreen(),    // Tela de Perfil
+    AdminCrudScreen(),       // Gerenciamento de cardápios (CRUD)
+    AdminUploadCsvScreen(),  // Upload de CSV
+    AdminSettingsScreen(),   // Configurações e logout
   ];
 
   void _onItemTapped(int index) {
@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _pageController.animateToPage(
       index,
-      duration: Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 250),
       curve: Curves.easeInOut,
     );
   }
@@ -46,22 +46,23 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
+        physics: BouncingScrollPhysics(), // Scroll mais fluido
         children: _widgetOptions,
         onPageChanged: _onPageChanged,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant_menu),
-            label: 'Menu',
+            icon: Icon(Icons.menu_book),
+            label: 'Cardápios',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favoritos',
+            icon: Icon(Icons.upload_file),
+            label: 'Upload CSV',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
+            icon: Icon(Icons.settings),
+            label: 'Configurações',
           ),
         ],
         currentIndex: _selectedIndex,
