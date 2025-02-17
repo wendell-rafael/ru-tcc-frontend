@@ -44,6 +44,51 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
     pao = widget.cardapio?.pao;
   }
 
+  // Função para calcular as diferenças entre o cardápio antigo e o novo
+  Map<String, Map<String, dynamic>> _calcularDiferencas(Cardapio oldCardapio, Cardapio newCardapio) {
+    final Map<String, Map<String, dynamic>> diffs = {};
+    if (oldCardapio.opcao1 != newCardapio.opcao1) {
+      diffs['opcao1'] = {'old': oldCardapio.opcao1, 'new': newCardapio.opcao1};
+    }
+    if (oldCardapio.opcao2 != newCardapio.opcao2) {
+      diffs['opcao2'] = {'old': oldCardapio.opcao2, 'new': newCardapio.opcao2};
+    }
+    if (oldCardapio.opcaoVegana != newCardapio.opcaoVegana) {
+      diffs['opcaoVegana'] = {'old': oldCardapio.opcaoVegana, 'new': newCardapio.opcaoVegana};
+    }
+    if (oldCardapio.opcaoVegetariana != newCardapio.opcaoVegetariana) {
+      diffs['opcaoVegetariana'] = {'old': oldCardapio.opcaoVegetariana, 'new': newCardapio.opcaoVegetariana};
+    }
+    if (oldCardapio.salada1 != newCardapio.salada1) {
+      diffs['salada1'] = {'old': oldCardapio.salada1, 'new': newCardapio.salada1};
+    }
+    if (oldCardapio.salada2 != newCardapio.salada2) {
+      diffs['salada2'] = {'old': oldCardapio.salada2, 'new': newCardapio.salada2};
+    }
+    if (oldCardapio.guarnicao != newCardapio.guarnicao) {
+      diffs['guarnicao'] = {'old': oldCardapio.guarnicao, 'new': newCardapio.guarnicao};
+    }
+    if (oldCardapio.acompanhamento1 != newCardapio.acompanhamento1) {
+      diffs['acompanhamento1'] = {'old': oldCardapio.acompanhamento1, 'new': newCardapio.acompanhamento1};
+    }
+    if (oldCardapio.acompanhamento2 != newCardapio.acompanhamento2) {
+      diffs['acompanhamento2'] = {'old': oldCardapio.acompanhamento2, 'new': newCardapio.acompanhamento2};
+    }
+    if (oldCardapio.suco != newCardapio.suco) {
+      diffs['suco'] = {'old': oldCardapio.suco, 'new': newCardapio.suco};
+    }
+    if (oldCardapio.sobremesa != newCardapio.sobremesa) {
+      diffs['sobremesa'] = {'old': oldCardapio.sobremesa, 'new': newCardapio.sobremesa};
+    }
+    if (oldCardapio.cafe != newCardapio.cafe) {
+      diffs['cafe'] = {'old': oldCardapio.cafe, 'new': newCardapio.cafe};
+    }
+    if (oldCardapio.pao != newCardapio.pao) {
+      diffs['pao'] = {'old': oldCardapio.pao, 'new': newCardapio.pao};
+    }
+    return diffs;
+  }
+
   Future<void> _saveCardapio() async {
     if (_formKey.currentState!.validate()) {
       String? clean(String? value) =>
@@ -71,9 +116,27 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
       try {
         if (widget.cardapio == null) {
           await _cardapioService.createCardapio(newCardapio);
+          // Opcional: registrar a criação como alteração
+          await _cardapioService.registrarAlteracao(
+            dia: newCardapio.dia,
+            refeicao: newCardapio.refeicao,
+            changes: {
+              'info': {'old': null, 'new': 'Cardápio criado'}
+            },
+          );
         } else {
           await _cardapioService.updateCardapio(widget.cardapio!.id, newCardapio);
+          // Calcula as diferenças e registra se houver alterações
+          final diff = _calcularDiferencas(widget.cardapio!, newCardapio);
+          if (diff.isNotEmpty) {
+            await _cardapioService.registrarAlteracao(
+              dia: newCardapio.dia,
+              refeicao: newCardapio.refeicao,
+              changes: diff,
+            );
+          }
         }
+
         Navigator.pop(context, true); // Atualiza lista ao retornar
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

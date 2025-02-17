@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rutccc/models/cardapio.dart';
@@ -6,7 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 
 class CardapioService {
-  final String baseUrl = 'http://192.168.0.5:8000';
+  final String baseUrl = 'http://192.168.246.39:8000';
 
   Future<String?> _getToken() async {
     return await FirebaseAuth.instance.currentUser?.getIdToken();
@@ -134,5 +135,18 @@ class CardapioService {
     } else {
       throw Exception("Erro ao importar cardápio: ${response.body}");
     }
+  }
+
+  Future<void> registrarAlteracao({
+    required int dia,
+    required String refeicao,
+    required Map<String, Map<String, dynamic>> changes,
+  }) async {
+    await FirebaseFirestore.instance.collection('cardapioChanges').add({
+      'dia': dia,
+      'refeicao': refeicao,
+      'changes': changes,
+      'timestamp': Timestamp.now(),
+    });
   }
 }

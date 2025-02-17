@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/user.dart';
 class UserService {
-  final String baseUrl = 'http://192.168.0.5:8000';
+  final String baseUrl = 'http://192.168.246.39:8000';
 
   Future<String?> _getToken() async {
     return await FirebaseAuth.instance.currentUser?.getIdToken();
