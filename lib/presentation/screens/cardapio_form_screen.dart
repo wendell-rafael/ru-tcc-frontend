@@ -1,0 +1,264 @@
+import 'package:flutter/material.dart';
+import 'package:rutccc/models/cardapio.dart';
+import '../../domain/services/cardapio_service.dart';
+
+class CardapioFormScreen extends StatefulWidget {
+  final Cardapio? cardapio;
+
+  const CardapioFormScreen({Key? key, this.cardapio}) : super(key: key);
+
+  @override
+  _CardapioFormScreenState createState() => _CardapioFormScreenState();
+}
+
+class _CardapioFormScreenState extends State<CardapioFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final CardapioService _cardapioService = CardapioService();
+
+  // Campos
+  late int dia;
+  late String refeicao;
+  String? opcao1, opcao2, opcaoVegana, opcaoVegetariana;
+  String? salada1, salada2, guarnicao;
+  String? acompanhamento1, acompanhamento2, suco;
+  String? sobremesa, cafe, pao;
+
+  @override
+  void initState() {
+    super.initState();
+    // Preenche com valores existentes ou padrões
+    dia = widget.cardapio?.dia ?? 1;
+    refeicao = widget.cardapio?.refeicao ?? '';
+    opcao1 = widget.cardapio?.opcao1;
+    opcao2 = widget.cardapio?.opcao2;
+    opcaoVegana = widget.cardapio?.opcaoVegana;
+    opcaoVegetariana = widget.cardapio?.opcaoVegetariana;
+    salada1 = widget.cardapio?.salada1;
+    salada2 = widget.cardapio?.salada2;
+    guarnicao = widget.cardapio?.guarnicao;
+    acompanhamento1 = widget.cardapio?.acompanhamento1;
+    acompanhamento2 = widget.cardapio?.acompanhamento2;
+    suco = widget.cardapio?.suco;
+    sobremesa = widget.cardapio?.sobremesa;
+    cafe = widget.cardapio?.cafe;
+    pao = widget.cardapio?.pao;
+  }
+
+  Future<void> _saveCardapio() async {
+    if (_formKey.currentState!.validate()) {
+      String? clean(String? value) => (value == null || value.trim().isEmpty) ? null : value;
+
+      final newCardapio = Cardapio(
+        id: widget.cardapio?.id ?? 0,
+        dia: dia,
+        refeicao: clean(refeicao) ?? '',
+        opcao1: clean(opcao1),
+        opcao2: clean(opcao2),
+        opcaoVegana: clean(opcaoVegana),
+        opcaoVegetariana: clean(opcaoVegetariana),
+        salada1: clean(salada1),
+        salada2: clean(salada2),
+        guarnicao: clean(guarnicao),
+        acompanhamento1: clean(acompanhamento1),
+        acompanhamento2: clean(acompanhamento2),
+        suco: clean(suco),
+        sobremesa: clean(sobremesa),
+        cafe: clean(cafe),
+        pao: clean(pao),
+      );
+
+      try {
+        if (widget.cardapio == null) {
+          await _cardapioService.createCardapio(newCardapio);
+        } else {
+          await _cardapioService.updateCardapio(widget.cardapio!.id, newCardapio);
+        }
+        Navigator.pop(context, true); // ✅ Atualiza lista ao retornar
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar: $e')),
+        );
+      }
+    }
+  }
+
+
+  Widget _buildTextField({
+    required String label,
+    required String? initialValue,
+    required ValueChanged<String?> onChanged,
+    bool isRequired = false,
+    IconData? icon,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: TextFormField(
+        initialValue: initialValue,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: 'Digite $label...',
+          prefixIcon: icon != null ? Icon(icon, color: Colors.orange) : null,
+          labelStyle:
+              TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.orange),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.orange, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+        style: TextStyle(fontSize: 16),
+        validator: isRequired
+            ? (value) =>
+                value == null || value.isEmpty ? 'Preencha $label' : null
+            : null,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Text(
+        title,
+        style: TextStyle(
+            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.cardapio == null ? 'Novo Cardápio' : 'Editar Cardápio',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: _saveCardapio,
+          )
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('Informações Gerais'),
+                _buildTextField(
+                  label: 'Dia',
+                  initialValue: dia.toString(),
+                  onChanged: (value) => dia = int.tryParse(value ?? '1') ?? 1,
+                  isRequired: true,
+                  icon: Icons.calendar_today,
+                ),
+                _buildTextField(
+                  label: 'Refeição',
+                  initialValue: refeicao,
+                  onChanged: (value) => refeicao = value ?? '',
+                  isRequired: true,
+                  icon: Icons.restaurant_menu,
+                ),
+                Divider(thickness: 2, color: Colors.grey),
+                _buildSectionTitle('Pratos Principais'),
+                _buildTextField(
+                    label: 'Opção 1',
+                    initialValue: opcao1,
+                    onChanged: (v) => opcao1 = v,
+                    icon: Icons.set_meal),
+                _buildTextField(
+                    label: 'Opção 2',
+                    initialValue: opcao2,
+                    onChanged: (v) => opcao2 = v,
+                    icon: Icons.dinner_dining),
+                _buildTextField(
+                    label: 'Opção Vegana',
+                    initialValue: opcaoVegana,
+                    onChanged: (v) => opcaoVegana = v,
+                    icon: Icons.eco),
+                _buildTextField(
+                    label: 'Opção Vegetariana',
+                    initialValue: opcaoVegetariana,
+                    onChanged: (v) => opcaoVegetariana = v,
+                    icon: Icons.spa),
+                Divider(thickness: 2, color: Colors.grey),
+                _buildSectionTitle('Saladas e Acompanhamentos'),
+                _buildTextField(
+                    label: 'Salada 1',
+                    initialValue: salada1,
+                    onChanged: (v) => salada1 = v,
+                    icon: Icons.grass),
+                _buildTextField(
+                    label: 'Salada 2',
+                    initialValue: salada2,
+                    onChanged: (v) => salada2 = v,
+                    icon: Icons.grass),
+                _buildTextField(
+                    label: 'Guarnição',
+                    initialValue: guarnicao,
+                    onChanged: (v) => guarnicao = v,
+                    icon: Icons.rice_bowl),
+                _buildTextField(
+                    label: 'Acompanhamento 1',
+                    initialValue: acompanhamento1,
+                    onChanged: (v) => acompanhamento1 = v,
+                    icon: Icons.fastfood),
+                _buildTextField(
+                    label: 'Acompanhamento 2',
+                    initialValue: acompanhamento2,
+                    onChanged: (v) => acompanhamento2 = v,
+                    icon: Icons.fastfood),
+                Divider(thickness: 2, color: Colors.grey),
+                _buildSectionTitle('Extras'),
+                _buildTextField(
+                    label: 'Suco',
+                    initialValue: suco,
+                    onChanged: (v) => suco = v,
+                    icon: Icons.local_drink),
+                _buildTextField(
+                    label: 'Sobremesa',
+                    initialValue: sobremesa,
+                    onChanged: (v) => sobremesa = v,
+                    icon: Icons.icecream),
+                _buildTextField(
+                    label: 'Café',
+                    initialValue: cafe,
+                    onChanged: (v) => cafe = v,
+                    icon: Icons.coffee),
+                _buildTextField(
+                    label: 'Pão',
+                    initialValue: pao,
+                    onChanged: (v) => pao = v,
+                    icon: Icons.bakery_dining),
+                SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: _saveCardapio,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                  ),
+                  icon: Icon(Icons.check, color: Colors.white),
+                  label: Text('Salvar',
+                      style: TextStyle(color: Colors.white, fontSize: 16)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

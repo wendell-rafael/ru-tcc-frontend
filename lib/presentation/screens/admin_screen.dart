@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'admin_crud_screen.dart';
+import 'cardapio_list_screen.dart';
 import 'admin_upload_csv_screen.dart';
 import 'admin_settings_screen.dart';
 
@@ -13,9 +13,9 @@ class _AdminScreenState extends State<AdminScreen> {
   final PageController _pageController = PageController(initialPage: 0);
 
   static final List<Widget> _widgetOptions = <Widget>[
-    AdminCrudScreen(),       // Gerenciamento de cardápios (CRUD)
-    AdminUploadCsvScreen(),  // Upload de CSV
-    AdminSettingsScreen(),   // Configurações e logout
+    CardapioListScreen(),
+    AdminUploadCsvScreen(),
+    AdminSettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -36,17 +36,30 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _selectedIndex == 0
+                  ? 'Cardápios'
+                  : _selectedIndex == 1
+                  ? 'Upload de CSV'
+                  : 'Configurações',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            Icon(Icons.admin_panel_settings, color: Colors.orange, size: 28),
+          ],
+        ),
+        centerTitle: true,
+      ),
       body: PageView(
         controller: _pageController,
-        physics: BouncingScrollPhysics(), // Scroll mais fluido
+        physics: BouncingScrollPhysics(),
         children: _widgetOptions,
         onPageChanged: _onPageChanged,
       ),
@@ -66,7 +79,7 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xFFE65100),
+        selectedItemColor: Colors.orange,
         onTap: _onItemTapped,
       ),
     );

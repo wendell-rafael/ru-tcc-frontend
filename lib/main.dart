@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -12,7 +13,6 @@ import 'presentation/screens/home_screen.dart';
 import 'presentation/screens/admin_screen.dart'; // Nova tela para admin
 import 'domain/controllers/register_controller.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
-
 
 void main() async {
   tz.initializeTimeZones();
@@ -86,6 +86,7 @@ class MyApp extends StatelessWidget {
                     );
                   }
                   print(roleSnapshot.data);
+                  print(FirebaseAuth.instance.currentUser?.getIdToken().asStream().toString());
                   if (roleSnapshot.hasData && roleSnapshot.data == "admin") {
                     return AdminScreen(); // Tela de admin
                   }
