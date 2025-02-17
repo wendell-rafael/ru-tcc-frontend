@@ -113,93 +113,176 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
     }
   }
 
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'Ajuda',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHelpItem('Selecionar Arquivo', 'Escolha um arquivo CSV do seu dispositivo.'),
+              SizedBox(height: 12),
+              _buildHelpItem('Enviar Arquivo', 'Faz o upload do arquivo selecionado para o Firebase Storage.'),
+              SizedBox(height: 12),
+              _buildHelpItem('Importar Cardápio do Mês', 'Busca e importa o cardápio do mês atual (arquivo nomeado como cardapio-mesX.csv) para o sistema.'),
+              SizedBox(height: 12),
+              _buildHelpItem('Progresso', 'O indicador de progresso mostra a porcentagem de upload em tempo real.'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Fechar',
+              style: TextStyle(fontSize: 16, color: Colors.deepPurple),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpItem(String title, String description) {
+    return RichText(
+      text: TextSpan(
+        text: '• $title: ',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+        children: [
+          TextSpan(
+            text: description,
+            style: TextStyle(fontWeight: FontWeight.normal),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
+      minimumSize: Size(double.infinity, 56),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Upload CSV'),
-        backgroundColor: Colors.black,
+        title: Text(
+          'Carregar Cardapios',
+          style: TextStyle(color: Colors.white, fontSize: 22),
+        ),
+        backgroundColor: Color(0xFFE65100),
+        toolbarHeight: 60,
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xFFE65100),
+        onPressed: _showHelpDialog,
+        child: Icon(Icons.info),
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.insert_drive_file, size: 100, color: Colors.grey),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFE65100),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: _pickFile,
-                child: Text(
-                  'Selecionar Arquivo',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-              SizedBox(height: 20),
-              _selectedFileName != null
-                  ? Text(
-                'Arquivo: $_selectedFileName',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              )
-                  : Text(
-                'Nenhum arquivo selecionado',
-                style: TextStyle(fontSize: 16, color: Colors.black54),
-              ),
-              SizedBox(height: 20),
-              if (_isUploading)
-                Column(
-                  children: [
-                    LinearProgressIndicator(
-                      value: _uploadProgress,
-                      backgroundColor: Colors.grey[300],
+          padding: const EdgeInsets.all(24.0),
+          child: Card(
+            elevation: 6,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.cloud_upload, size: 80, color: Color(0xFFE65100)),
+                  SizedBox(height: 16),
+                  Text(
+                    'Gerencie seus arquivos CSV',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
                       color: Color(0xFFE65100),
-                      minHeight: 6,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      '${(_uploadProgress * 100).toStringAsFixed(0)}%',
-                      style: TextStyle(fontSize: 16, color: Colors.black),
-                    ),
-                  ],
-                )
-              else
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: _uploadFile,
-                  child: Text(
-                    'Enviar Arquivo',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    style: buttonStyle.copyWith(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.orange)),
+                    onPressed: _pickFile,
+                    icon: Icon(Icons.attach_file),
+                    label: Text(
+                      'Selecionar Arquivo',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
-                ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                  SizedBox(height: 16),
+                  _selectedFileName != null
+                      ? Text(
+                          'Arquivo selecionado: $_selectedFileName',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        )
+                      : Text(
+                          'Nenhum arquivo selecionado',
+                          style:
+                              TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        ),
+                  SizedBox(height: 24),
+                  _isUploading
+                      ? Column(
+                          children: [
+                            LinearProgressIndicator(
+                              value: _uploadProgress,
+                              backgroundColor: Colors.grey[300],
+                              color: Colors.orange,
+                              minHeight: 8,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          ],
+                        )
+                      : ElevatedButton.icon(
+                          style: buttonStyle.copyWith(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.green)),
+                          onPressed: _uploadFile,
+                          icon: Icon(Icons.cloud_upload),
+                          label: Text(
+                            'Enviar Arquivo',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                  SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    style: buttonStyle.copyWith(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.blue)),
+                    onPressed: _importMonthlyCardapio,
+                    icon: Icon(Icons.download),
+                    label: Text(
+                      'Importar Cardápio do Mês',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
-                ),
-                onPressed: _importMonthlyCardapio,
-                child: Text(
-                  'Importar Cardápio do Mês',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

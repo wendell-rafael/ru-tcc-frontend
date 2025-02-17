@@ -27,8 +27,8 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
   void initState() {
     super.initState();
     // Preenche com valores existentes ou padrões
-    dia = widget.cardapio?.dia ?? 1;
-    refeicao = widget.cardapio?.refeicao ?? '';
+    dia = widget.cardapio?.dia ?? DateTime.now().day;
+    refeicao = widget.cardapio?.refeicao ?? 'Almoço';
     opcao1 = widget.cardapio?.opcao1;
     opcao2 = widget.cardapio?.opcao2;
     opcaoVegana = widget.cardapio?.opcaoVegana;
@@ -46,12 +46,13 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
 
   Future<void> _saveCardapio() async {
     if (_formKey.currentState!.validate()) {
-      String? clean(String? value) => (value == null || value.trim().isEmpty) ? null : value;
+      String? clean(String? value) =>
+          (value == null || value.trim().isEmpty) ? null : value;
 
       final newCardapio = Cardapio(
         id: widget.cardapio?.id ?? 0,
         dia: dia,
-        refeicao: clean(refeicao) ?? '',
+        refeicao: refeicao,
         opcao1: clean(opcao1),
         opcao2: clean(opcao2),
         opcaoVegana: clean(opcaoVegana),
@@ -73,7 +74,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
         } else {
           await _cardapioService.updateCardapio(widget.cardapio!.id, newCardapio);
         }
-        Navigator.pop(context, true); // ✅ Atualiza lista ao retornar
+        Navigator.pop(context, true); // Atualiza lista ao retornar
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao salvar: $e')),
@@ -81,7 +82,6 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
       }
     }
   }
-
 
   Widget _buildTextField({
     required String label,
@@ -99,7 +99,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
           hintText: 'Digite $label...',
           prefixIcon: icon != null ? Icon(icon, color: Colors.orange) : null,
           labelStyle:
-              TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+          TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.orange),
@@ -114,9 +114,48 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
         style: TextStyle(fontSize: 16),
         validator: isRequired
             ? (value) =>
-                value == null || value.isEmpty ? 'Preencha $label' : null
+        value == null || value.isEmpty ? 'Preencha $label' : null
             : null,
         onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildDropdownRefeicao() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: DropdownButtonFormField<String>(
+        value: refeicao.isNotEmpty ? refeicao : 'Almoço',
+        decoration: InputDecoration(
+          labelText: 'Refeição',
+          hintText: 'Selecione a refeição...',
+          prefixIcon: Icon(Icons.restaurant_menu, color: Colors.orange),
+          labelStyle:
+          TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.orange),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.orange, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+        items: <String>['Almoço', 'Jantar'].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value, style: TextStyle(fontSize: 16)),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            refeicao = value ?? 'Almoço';
+          });
+        },
+        validator: (value) =>
+        value == null || value.isEmpty ? 'Selecione uma refeição' : null,
       ),
     );
   }
@@ -162,17 +201,12 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
                 _buildTextField(
                   label: 'Dia',
                   initialValue: dia.toString(),
-                  onChanged: (value) => dia = int.tryParse(value ?? '1') ?? 1,
+                  onChanged: (value) =>
+                  dia = int.tryParse(value ?? '1') ?? 1,
                   isRequired: true,
                   icon: Icons.calendar_today,
                 ),
-                _buildTextField(
-                  label: 'Refeição',
-                  initialValue: refeicao,
-                  onChanged: (value) => refeicao = value ?? '',
-                  isRequired: true,
-                  icon: Icons.restaurant_menu,
-                ),
+                _buildDropdownRefeicao(),
                 Divider(thickness: 2, color: Colors.grey),
                 _buildSectionTitle('Pratos Principais'),
                 _buildTextField(
@@ -249,10 +283,13 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
                   onPressed: _saveCardapio,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
+                    minimumSize: Size(double.infinity, 60),
                   ),
                   icon: Icon(Icons.check, color: Colors.white),
-                  label: Text('Salvar',
-                      style: TextStyle(color: Colors.white, fontSize: 16)),
+                  label: Text(
+                    'Salvar',
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
                 ),
               ],
             ),

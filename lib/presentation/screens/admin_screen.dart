@@ -38,25 +38,6 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _selectedIndex == 0
-                  ? 'Cardápios'
-                  : _selectedIndex == 1
-                  ? 'Upload de CSV'
-                  : 'Configurações',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            Icon(Icons.admin_panel_settings, color: Colors.orange, size: 28),
-          ],
-        ),
-        centerTitle: true,
-      ),
       body: PageView(
         controller: _pageController,
         physics: BouncingScrollPhysics(),
