@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rutccc/models/cardapio.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz;
 
 class CardapioService {
   final String baseUrl = 'http://192.168.0.5:8000';
@@ -12,7 +13,7 @@ class CardapioService {
   }
 
   List<Cardapio> _decodeCardapios(String responseBody) {
-    final decoded = convert.utf8.decode(responseBody.runes.toList());
+    final decoded = utf8.decode(responseBody.runes.toList());
     List<dynamic> data = jsonDecode(decoded);
     return data.map((e) => Cardapio.fromJson(e)).toList();
   }
@@ -45,7 +46,7 @@ class CardapioService {
       },
     );
     if (response.statusCode == 200) {
-      final decoded = convert.utf8.decode(response.body.runes.toList());
+      final decoded = utf8.decode(response.body.runes.toList());
       return Cardapio.fromJson(jsonDecode(decoded));
     } else {
       throw Exception('Erro ao buscar o cardápio');
@@ -68,6 +69,7 @@ class CardapioService {
     }
   }
 
+  // 📌 PUT: Atualizar cardápio
   Future<void> updateCardapio(int id, Cardapio cardapio) async {
     final token = await _getToken();
     final response = await http.put(
@@ -76,16 +78,12 @@ class CardapioService {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json; charset=utf-8',
       },
-      body: jsonEncode(cardapio.toJson()), // ✅ Agora inclui o ID no corpo
+      body: jsonEncode(cardapio.toJson()),
     );
-
     if (response.statusCode != 200) {
-      print('Erro no PUT: ${response.statusCode}');
-      print('Resposta: ${response.body}');
       throw Exception('Erro ao atualizar cardápio: ${response.body}');
     }
   }
-
 
   // 📌 PATCH: Atualizar parcialmente
   Future<void> patchCardapio(int id, Map<String, dynamic> updates) async {
@@ -115,6 +113,26 @@ class CardapioService {
     );
     if (response.statusCode != 200) {
       throw Exception('Erro ao remover cardápio');
+    }
+  }
+
+  // 📌 POST: Importar o cardápio do mês
+  Future<String> importCardapio() async {
+    tz.initializeTimeZones();
+    var saoPaulo = tz.getLocation('America/Sao_Paulo');
+    int month = tz.TZDateTime.now(saoPaulo).month;
+    String fileName = "cardapio-mes$month.csv";
+    final token = await _getToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/cardapios/import?nome_cardapio=$fileName'),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      return data["message"];
+    } else {
+      throw Exception("Erro ao importar cardápio: ${response.body}");
     }
   }
 }

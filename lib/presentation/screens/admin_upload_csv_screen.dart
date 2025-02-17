@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
+
+import '../../domain/services/cardapio_service.dart';
 
 class AdminUploadCsvScreen extends StatefulWidget {
   @override
@@ -18,13 +21,14 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
   double _uploadProgress = 0.0;
   String? _downloadUrl;
 
+  final CardapioService _cardapioService = CardapioService();
+
   @override
   void initState() {
     super.initState();
     tz.initializeTimeZones();
   }
 
-  // Método de upload usando o timezone para obter a data do Brasil
   Future<void> _uploadFile() async {
     if (_selectedFile == null || _selectedFile!.path == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -32,44 +36,34 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
       );
       return;
     }
-
     setState(() {
       _isUploading = true;
       _uploadProgress = 0.0;
     });
-
     try {
       final File file = File(_selectedFile!.path!);
-
-      // Utiliza a localização do Brasil (São Paulo) para gerar o nome do arquivo
       var saoPaulo = tz.getLocation('America/Sao_Paulo');
       int month = tz.TZDateTime.now(saoPaulo).month;
       String fileName = "cardapio-mes$month.csv";
       String filePath = "uploads/csv/$fileName";
-
       Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
       UploadTask uploadTask = storageRef.putFile(file);
-
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
         double progress = snapshot.bytesTransferred / snapshot.totalBytes;
         setState(() {
           _uploadProgress = progress;
         });
       });
-
       TaskSnapshot snapshot = await uploadTask;
       String downloadUrl = await snapshot.ref.getDownloadURL();
-
       setState(() {
         _downloadUrl = downloadUrl;
       });
-
       await FirebaseFirestore.instance.collection('uploads').add({
         'fileName': fileName,
         'url': downloadUrl,
         'timestamp': FieldValue.serverTimestamp(),
       });
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Arquivo enviado com sucesso: $fileName')),
       );
@@ -93,13 +87,24 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
     }
   }
 
-  // O restante do código permanece o mesmo (método _pickFile e build)
+  Future<void> _importMonthlyCardapio() async {
+    try {
+      String message = await _cardapioService.importCardapio();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao importar cardápio: $e')),
+      );
+    }
+  }
+
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv'],
     );
-
     if (result != null && result.files.isNotEmpty) {
       setState(() {
         _selectedFile = result.files.first;
@@ -179,6 +184,21 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _importMonthlyCardapio,
+                child: Text(
+                  'Importar Cardápio do Mês',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
             ],
           ),
         ),
