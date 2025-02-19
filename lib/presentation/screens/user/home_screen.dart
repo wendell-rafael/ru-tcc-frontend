@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
-import 'admin_crud_screen.dart';
-import 'admin_upload_csv_screen.dart';
-import 'admin_settings_screen.dart';
+import 'package:rutccc/presentation/screens/user/profile_screen.dart';
+import '../shared/checkin_screen.dart';
+import 'favorite_screen.dart';
+import 'menu_screen.dart';
 
-class AdminScreen extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   @override
-  _AdminScreenState createState() => _AdminScreenState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final PageController _pageController = PageController(initialPage: 0);
 
   static final List<Widget> _widgetOptions = <Widget>[
-    AdminCrudScreen(),       // Gerenciamento de cardápios (CRUD)
-    AdminUploadCsvScreen(),  // Upload de CSV
-    AdminSettingsScreen(),   // Configurações e logout
+    MenuScreen(), // Tela de Menu
+    FavoritesScreen(), // Tela
+    CheckInScreen(), // Nova Tela de Check-in// de Favoritos
+    ProfileScreen(), // Tela de Perfil
   ];
 
   void _onItemTapped(int index) {
@@ -24,7 +26,7 @@ class _AdminScreenState extends State<AdminScreen> {
     });
     _pageController.animateToPage(
       index,
-      duration: Duration(milliseconds: 250),
+      duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
@@ -46,28 +48,33 @@ class _AdminScreenState extends State<AdminScreen> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        physics: BouncingScrollPhysics(), // Scroll mais fluido
         children: _widgetOptions,
         onPageChanged: _onPageChanged,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Cardápios',
+            icon: Icon(Icons.restaurant_menu),
+            label: 'Menu',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.upload_file),
-            label: 'Upload CSV',
+            icon: Icon(Icons.favorite),
+            label: 'Favoritos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configurações',
+            icon: Icon(Icons.check_circle), // Ícone do check-in
+            label: 'Check-in', // Rótulo do check-in
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Perfil',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Color(0xFFE65100),
         onTap: _onItemTapped,
+        type: BottomNavigationBarType
+            .fixed, // Fixando o tipo para garantir que todos os ícones apareçam
       ),
     );
   }

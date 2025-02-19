@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:rutccc/presentation/screens/register_screen.dart';
-import 'home_screen.dart';
-import 'admin_screen.dart';
+import 'package:rutccc/presentation/screens/auth/register_screen.dart';
+import '../admin/admin_screen.dart';
+import '../user/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
-                      'assets/images/food.png',
+                      'assets/images/logo.png',
                       height: 150,
                     ),
                     SizedBox(height: 24),
