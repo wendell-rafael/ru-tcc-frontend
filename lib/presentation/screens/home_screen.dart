@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rutccc/presentation/screens/profile_screen.dart';
 import 'favorite_screen.dart';
 import 'menu_screen.dart';
+import 'checkin_screen.dart'; // Adicionando a tela de check-in
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -13,9 +14,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController(initialPage: 0);
 
   static final List<Widget> _widgetOptions = <Widget>[
-    MenuScreen(),       // Tela de Menu
-    FavoritesScreen(),  // Tela de Favoritos
-    ProfileScreen(),    // Tela de Perfil
+    MenuScreen(), // Tela de Menu
+    FavoritesScreen(), // Tela
+    CheckInScreen(), // Nova Tela de Check-in// de Favoritos
+    ProfileScreen(), // Tela de Perfil
   ];
 
   void _onItemTapped(int index) {
@@ -60,6 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Favoritos',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.check_circle), // Ícone do check-in
+            label: 'Check-in', // Rótulo do check-in
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Perfil',
           ),
@@ -67,6 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         selectedItemColor: Color(0xFFE65100),
         onTap: _onItemTapped,
+        type: BottomNavigationBarType
+            .fixed, // Fixando o tipo para garantir que todos os ícones apareçam
       ),
     );
   }

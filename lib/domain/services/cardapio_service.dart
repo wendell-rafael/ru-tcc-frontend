@@ -7,7 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 
 class CardapioService {
-  final String baseUrl = 'http://192.168.246.39:8000';
+  final String baseUrl = 'http://192.168.0.5:8000';
 
   Future<String?> _getToken() async {
     return await FirebaseAuth.instance.currentUser?.getIdToken();

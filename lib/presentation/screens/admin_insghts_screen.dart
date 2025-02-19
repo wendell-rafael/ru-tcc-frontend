@@ -5,7 +5,19 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 enum InsightType {
   students,
   changedDishes,
-  changesOverTime,
+  changesByMeal,
+}
+
+class PieChartData {
+  final String category;
+  final double value;
+  PieChartData(this.category, this.value);
+}
+
+class ChartData {
+  final String label;
+  final double value;
+  ChartData(this.label, this.value);
 }
 
 class AdminDashboardInsightsScreen extends StatefulWidget {
@@ -21,9 +33,7 @@ class _AdminDashboardInsightsScreenState
   InsightType selectedInsight = InsightType.students;
   final Color orangeColor = const Color(0xFFE65100);
 
-  // -----------------------------------------------------------
   // 1. Dados de alunos
-  // Realiza 3 queries para obter total, veganos e vegetarianos.
   Future<Map<String, int>> _getStudentData() async {
     final firestore = FirebaseFirestore.instance;
     final totalSnapshot = await firestore.collection('users').get();
@@ -39,15 +49,18 @@ class _AdminDashboardInsightsScreenState
         .get();
     final vegetarian = vegetarianSnapshot.size;
     final others = total - (veganos + vegetarian);
-    return {'total': total, 'veganos': veganos, 'vegetarian': vegetarian, 'others': others};
+    return {
+      'total': total,
+      'veganos': veganos,
+      'vegetarian': vegetarian,
+      'others': others
+    };
   }
 
-  // -----------------------------------------------------------
-  // 2. Dados de pratos mudados: agrega por campo
+  // 2. Dados de pratos mudados: agrega alterações por campo
   Future<List<ChartData>> _getChangedDishesData() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('cardapioChanges')
-        .get();
+    final snapshot =
+    await FirebaseFirestore.instance.collection('cardapioChanges').get();
     final Map<String, int> counts = {};
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
@@ -63,37 +76,21 @@ class _AdminDashboardInsightsScreenState
     return result;
   }
 
-  // -----------------------------------------------------------
-  // 3. Alterações ao longo do tempo: agrupa por mês (para o ano corrente)
-  Future<List<ChartData>> _getChangesOverTimeData() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('cardapioChanges')
-        .get();
-    // Cria um mapa com chave "Mês/Ano" e valor a contagem
+  // 3. Dados de alterações por refeição: agrupa os documentos pelo campo "refeicao"
+  Future<List<PieChartData>> _getChangesByMealData() async {
+    final snapshot =
+    await FirebaseFirestore.instance.collection('cardapioChanges').get();
     final Map<String, int> counts = {};
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
-      final Timestamp ts = data['timestamp'];
-      final DateTime date = ts.toDate();
-      // Aqui usamos o mês/ano; você pode ajustar para usar apenas mês se desejar
-      final key = "${date.month}/${date.year}";
-      counts[key] = (counts[key] ?? 0) + 1;
+      // Supondo que o documento possua um campo "refeicao"
+      final refeicao = data['refeicao'] as String? ?? 'Indefinido';
+      counts[refeicao] = (counts[refeicao] ?? 0) + 1;
     }
-    List<ChartData> result = counts.entries
-        .map((e) => ChartData(e.key, e.value.toDouble()))
+    List<PieChartData> result = counts.entries
+        .map((e) => PieChartData(e.key, e.value.toDouble()))
         .toList();
-    result.sort((a, b) {
-      // Ordena por data
-      final partsA = a.label.split('/');
-      final partsB = b.label.split('/');
-      final monthA = int.tryParse(partsA[0]) ?? 0;
-      final yearA = int.tryParse(partsA[1]) ?? 0;
-      final monthB = int.tryParse(partsB[0]) ?? 0;
-      final yearB = int.tryParse(partsB[1]) ?? 0;
-      final dateA = DateTime(yearA, monthA);
-      final dateB = DateTime(yearB, monthB);
-      return dateA.compareTo(dateB);
-    });
+    result.sort((a, b) => b.value.compareTo(a.value));
     return result;
   }
 
@@ -114,15 +111,17 @@ class _AdminDashboardInsightsScreenState
             return SfCircularChart(
               title: ChartTitle(
                 text: 'Distribuição de Alunos',
-                textStyle: TextStyle(color: orangeColor, fontWeight: FontWeight.bold),
+                textStyle: TextStyle(
+                    color: orangeColor, fontWeight: FontWeight.bold),
               ),
-              legend: Legend(isVisible: true, overflowMode: LegendItemOverflowMode.wrap),
+              legend:
+              Legend(isVisible: true, overflowMode: LegendItemOverflowMode.wrap),
               series: <CircularSeries>[
                 PieSeries<PieChartData, String>(
                   dataSource: pieData,
                   xValueMapper: (PieChartData data, _) => data.category,
                   yValueMapper: (PieChartData data, _) => data.value,
-                  dataLabelSettings: DataLabelSettings(isVisible: true),
+                  dataLabelSettings: const DataLabelSettings(isVisible: true),
                   explode: true,
                   explodeIndex: 0,
                   pointColorMapper: (PieChartData data, _) {
@@ -144,7 +143,8 @@ class _AdminDashboardInsightsScreenState
             return SfCartesianChart(
               title: ChartTitle(
                 text: 'Campos Mais Alterados',
-                textStyle: TextStyle(color: orangeColor, fontWeight: FontWeight.bold),
+                textStyle:
+                TextStyle(color: orangeColor, fontWeight: FontWeight.bold),
               ),
               primaryXAxis: CategoryAxis(
                 labelRotation: -45,
@@ -167,34 +167,37 @@ class _AdminDashboardInsightsScreenState
             );
           },
         );
-      case InsightType.changesOverTime:
-        return FutureBuilder<List<ChartData>>(
-          future: _getChangesOverTimeData(),
+      case InsightType.changesByMeal:
+        return FutureBuilder<List<PieChartData>>(
+          future: _getChangesByMealData(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return const CircularProgressIndicator();
-            final chartData = snapshot.data!;
-            return SfCartesianChart(
+            final pieData = snapshot.data!;
+            return SfCircularChart(
               title: ChartTitle(
-                text: 'Alterações ao Longo do Tempo',
-                textStyle: TextStyle(color: orangeColor, fontWeight: FontWeight.bold),
+                text: 'Alterações por Refeição',
+                textStyle:
+                TextStyle(color: orangeColor, fontWeight: FontWeight.bold),
               ),
-              primaryXAxis: CategoryAxis(
-                labelRotation: -45,
-                labelStyle: const TextStyle(fontSize: 10),
-              ),
-              primaryYAxis: NumericAxis(
-                interval: 1,
-                labelStyle: const TextStyle(fontSize: 10),
-              ),
-              tooltipBehavior: TooltipBehavior(enable: true),
-              series: <ChartSeries>[
-                LineSeries<ChartData, String>(
-                  dataSource: chartData,
-                  xValueMapper: (ChartData data, _) => data.label,
-                  yValueMapper: (ChartData data, _) => data.value,
-                  markerSettings: const MarkerSettings(isVisible: true),
+              legend:
+              Legend(isVisible: true, overflowMode: LegendItemOverflowMode.wrap),
+              series: <CircularSeries>[
+                PieSeries<PieChartData, String>(
+                  dataSource: pieData,
+                  xValueMapper: (PieChartData data, _) => data.category,
+                  yValueMapper: (PieChartData data, _) => data.value,
                   dataLabelSettings: const DataLabelSettings(isVisible: true),
-                  color: orangeColor,
+                  explode: true,
+                  explodeIndex: 0,
+                  pointColorMapper: (PieChartData data, _) {
+                    // Podemos definir cores específicas para cada refeição se desejar
+                    if (data.category.toLowerCase().contains("almoço")) {
+                      return orangeColor;
+                    } else if (data.category.toLowerCase().contains("jantar")) {
+                      return Colors.deepOrange;
+                    }
+                    return Colors.grey;
+                  },
                 )
               ],
             );
@@ -242,8 +245,9 @@ class _AdminDashboardInsightsScreenState
                   child: Text("Pratos Mudados", style: TextStyle(color: orangeColor)),
                 ),
                 DropdownMenuItem(
-                  value: InsightType.changesOverTime,
-                  child: Text("Alterações no Tempo", style: TextStyle(color: orangeColor)),
+                  value: InsightType.changesByMeal,
+                  child:
+                  Text("Alterações por Refeição", style: TextStyle(color: orangeColor)),
                 ),
               ],
               onChanged: (value) {
@@ -271,23 +275,9 @@ class _AdminDashboardInsightsScreenState
       body: Column(
         children: [
           _buildInsightSelector(),
-          Expanded(
-            child: _buildInsightChart(),
-          ),
+          Expanded(child: _buildInsightChart()),
         ],
       ),
     );
   }
-}
-
-class PieChartData {
-  final String category;
-  final double value;
-  PieChartData(this.category, this.value);
-}
-
-class ChartData {
-  final String label;
-  final double value;
-  ChartData(this.label, this.value);
 }

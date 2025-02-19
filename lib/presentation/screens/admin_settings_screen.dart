@@ -73,7 +73,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Configurações'),
+          title: const Text(
+            'Configurações',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: const Color(0xFFE65100),
         ),
         body: const Center(child: CircularProgressIndicator()),

@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+
+import '../../domain/services/favorito_service.dart';
 
 class FavoritesScreen extends StatefulWidget {
   @override
@@ -8,90 +12,101 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   final TextEditingController _controller = TextEditingController();
-  List<String> _favorites = []; // Lista de itens favoritos
+  List<dynamic> _favorites = [];  // Lista de favoritos obtida do backend
+
+  final FavoriteService _favoriteService = FavoriteService(); // Instancia do serviço
+  String? usuarioId;  // ID do usuário
 
   @override
   void initState() {
     super.initState();
-    _loadFavorites(); // Carrega os favoritos ao iniciar
+    _getUsuarioId();  // Obtém o usuário ID do Firebase
   }
 
-  Future<void> _loadFavorites() async {
+  // Função para pegar o UID do Firebase
+  Future<void> _getUsuarioId() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedFavorites = prefs.getStringList('favorites') ?? [];
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        setState(() {
+          usuarioId = user.uid;  // Define o UID do usuário
+        });
+        _loadFavorites();  // Carrega os favoritos após obter o UID
+      }
+    } catch (e) {
+      print('Erro ao obter o usuarioId: $e');
+    }
+  }
+
+  // Busca os favoritos do usuário no backend
+  Future<void> _loadFavorites() async {
+    if (usuarioId == null) return;
+
+    try {
+      List<dynamic> favorites = await _favoriteService.getFavorites(usuarioId!);
       setState(() {
-        _favorites = savedFavorites;
+        _favorites = favorites;
       });
     } catch (e) {
       print('Erro ao carregar favoritos: $e');
     }
   }
 
-  Future<void> _saveFavorites() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('favorites', _favorites);
-    } catch (e) {
-      print('Erro ao salvar favoritos: $e');
-    }
-  }
-
-  void _addFavorite() {
+  // Adiciona um favorito chamando o backend
+  Future<void> _addFavorite() async {
     final text = _controller.text.trim();
 
     if (text.isEmpty) {
-      // Exibe mensagem de erro se o campo estiver vazio
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Por favor, digite o nome de um item.',
-            style: TextStyle(color: Colors.white),
-          ),
+          content: Text('Por favor, digite o nome de um item.'),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    if (_favorites.contains(text)) {
-      // Exibe mensagem de erro se o item já estiver na lista
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Esse item já está na lista de favoritos.',
-            style: TextStyle(color: Colors.white),
+    if (usuarioId != null) {
+      try {
+        await _favoriteService.addFavorite(usuarioId!, text);
+        _controller.clear();
+        _loadFavorites();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Favorito adicionado com sucesso!'),
+            backgroundColor: Colors.green,
           ),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao adicionar favorito.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-
-    // Adiciona o item se for válido
-    setState(() {
-      _favorites.add(text);
-    });
-    _saveFavorites(); // Salva os favoritos localmente
-    _controller.clear(); // Limpa o campo de texto
-
-    // Exibe mensagem de sucesso
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Item adicionado aos favoritos!',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.green,
-      ),
-    );
   }
 
-  void _removeFavorite(String item) {
-    setState(() {
-      _favorites.remove(item); // Remove o item da lista
-    });
-    _saveFavorites(); // Atualiza os favoritos salvos
+  // Remove um favorito chamando o backend
+  Future<void> _removeFavorite(int id) async {
+    try {
+      await _favoriteService.removeFavorite(id);
+      _loadFavorites();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Favorito removido com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao remover favorito.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -99,21 +114,24 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFFE65100),
-        title: Text('Favoritos', style: TextStyle(fontSize: 24,color: Colors.white)),
-        elevation: 2,
+        toolbarHeight: 80.0,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Favoritos',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'O que você gostaria de comer?',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFE65100),
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFE65100)),
             ),
             SizedBox(height: 12),
             Row(
@@ -121,12 +139,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    style: TextStyle(color: Colors.white), // Texto em branco
+                    style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Digite o nome do item...',
-                      hintStyle: TextStyle(color: Colors.white70), // Placeholder em branco
+                      hintStyle: TextStyle(color: Colors.white70),
                       filled: true,
-                      fillColor: Color(0xFFE65100), // Fundo laranja
+                      fillColor: Color(0xFFE65100),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
@@ -140,55 +158,39 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   onPressed: _addFavorite,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFE65100),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                   ),
-                  child: Text(
-                    'Adicionar',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                  child: Text('Adicionar', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ],
             ),
             SizedBox(height: 16),
             Text(
               'Seus Favoritos:',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFE65100),
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFE65100)),
             ),
             SizedBox(height: 8),
             Expanded(
               child: _favorites.isEmpty
-                  ? Center(
-                child: Text(
-                  'Nenhum favorito adicionado.',
-                  style: TextStyle(fontSize: 18, color: Colors.black54),
-                ),
-              )
+                  ? Center(child: Text('Nenhum favorito adicionado.', style: TextStyle(fontSize: 18, color: Colors.black54)))
                   : ListView.builder(
                 itemCount: _favorites.length,
                 itemBuilder: (context, index) {
-                  final item = _favorites[index];
+                  final favorite = _favorites[index];
                   return Card(
-                    color: Color(0xFFE65100), // Fundo laranja no card
+                    color: Color(0xFFE65100),
                     margin: EdgeInsets.symmetric(vertical: 8),
                     elevation: 3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     child: ListTile(
                       title: Text(
-                        item,
-                        style: TextStyle(fontSize: 18, color: Colors.white), // Texto em branco
+                        favorite['prato'],
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                       trailing: IconButton(
-                        icon: Icon(Icons.delete, color: Colors.white), // Ícone em branco
-                        onPressed: () => _removeFavorite(item),
+                        icon: Icon(Icons.delete, color: Colors.white),
+                        onPressed: () => _removeFavorite(favorite['id']),
                         tooltip: 'Remover',
                       ),
                     ),
