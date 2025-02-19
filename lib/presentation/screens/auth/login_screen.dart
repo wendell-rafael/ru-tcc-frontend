@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rutccc/presentation/screens/register_screen.dart';
 import 'home_screen.dart';
-import 'admin_screen.dart';
+import 'admin/admin_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override

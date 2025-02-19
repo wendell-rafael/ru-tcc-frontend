@@ -1,4 +1,4 @@
-import 'package:rutccc/models/cardapio.dart';
+import 'package:rutccc/data/models/cardapio.dart';
 import 'cardapio_service.dart';
 
 final cardapioService = CardapioService();

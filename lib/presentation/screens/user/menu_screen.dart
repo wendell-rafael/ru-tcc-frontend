@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:rutccc/models/cardapio.dart';
+import 'package:rutccc/data/models/cardapio.dart';
 import 'package:rutccc/domain/services/cardapio_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 

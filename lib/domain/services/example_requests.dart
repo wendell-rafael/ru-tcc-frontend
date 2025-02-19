@@ -1,5 +1,5 @@
-import 'package:rutccc/models/cardapio.dart';
-import 'package:rutccc/models/favorito.dart';
+import 'package:rutccc/data/models/cardapio.dart';
+import 'package:rutccc/data/models/favorito.dart';
 import 'dart:convert';
 
 import 'api_service.dart';

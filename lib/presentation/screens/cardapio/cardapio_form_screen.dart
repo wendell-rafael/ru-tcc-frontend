@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rutccc/models/cardapio.dart';
+import 'package:rutccc/data/models/cardapio.dart';
 import '../../domain/services/cardapio_service.dart';
 
 class CardapioFormScreen extends StatefulWidget {
