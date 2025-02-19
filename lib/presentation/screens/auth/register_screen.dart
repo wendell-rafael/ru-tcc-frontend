@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../domain/controllers/register_controller.dart';
-import '../screens/home_screen.dart';
+import '../../../domain/controllers/register_controller.dart';
+import '../user/home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override

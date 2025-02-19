@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 
-import '../../domain/services/cardapio_service.dart';
+import '../../../domain/services/cardapio_service.dart';
 
 class AdminUploadCsvScreen extends StatefulWidget {
   @override
@@ -128,13 +128,17 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHelpItem('Selecionar Arquivo', 'Escolha um arquivo CSV do seu dispositivo.'),
+              _buildHelpItem('Selecionar Arquivo',
+                  'Escolha um arquivo CSV do seu dispositivo.'),
               SizedBox(height: 12),
-              _buildHelpItem('Enviar Arquivo', 'Faz o upload do arquivo selecionado para o Firebase Storage.'),
+              _buildHelpItem('Enviar Arquivo',
+                  'Faz o upload do arquivo selecionado para o Firebase Storage.'),
               SizedBox(height: 12),
-              _buildHelpItem('Importar Cardápio do Mês', 'Busca e importa o cardápio do mês atual (arquivo nomeado como cardapio-mesX.csv) para o sistema.'),
+              _buildHelpItem('Importar Cardápio do Mês',
+                  'Busca e importa o cardápio do mês atual (arquivo nomeado como cardapio-mesX.csv) para o sistema.'),
               SizedBox(height: 12),
-              _buildHelpItem('Progresso', 'O indicador de progresso mostra a porcentagem de upload em tempo real.'),
+              _buildHelpItem('Progresso',
+                  'O indicador de progresso mostra a porcentagem de upload em tempo real.'),
             ],
           ),
         ),
@@ -155,7 +159,8 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
     return RichText(
       text: TextSpan(
         text: '• $title: ',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+        style: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
         children: [
           TextSpan(
             text: description,
@@ -165,7 +170,6 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

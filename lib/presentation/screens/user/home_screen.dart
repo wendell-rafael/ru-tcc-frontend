@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rutccc/presentation/screens/profile_screen.dart';
+import 'package:rutccc/presentation/screens/user/profile_screen.dart';
+import '../shared/checkin_screen.dart';
 import 'favorite_screen.dart';
 import 'menu_screen.dart';
-import 'checkin_screen.dart'; // Adicionando a tela de check-in
 
 class HomeScreen extends StatefulWidget {
   @override

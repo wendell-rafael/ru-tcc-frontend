@@ -7,10 +7,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'presentation/screens/login_screen.dart';
-import 'presentation/screens/home_screen.dart';
-import 'presentation/screens/admin_screen.dart'; // Tela de admin
-import 'presentation/screens/splash_screen.dart'; // Tela de splash
+import 'presentation/screens/auth/login_screen.dart';
+import 'presentation/screens/user/home_screen.dart';
+import 'presentation/screens/admin/admin_screen.dart'; // Tela de admin
+import 'presentation/screens/auth/splash_screen.dart'; // Tela de splash
 import 'domain/controllers/register_controller.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 

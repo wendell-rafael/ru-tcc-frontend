@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:rutccc/presentation/screens/avaliacao_screen.dart';
+import 'package:rutccc/presentation/screens/shared/avaliacao_screen.dart';
 
-import 'heat_map_screen.dart';
+import '../user/heat_map_screen.dart';
 
 class CheckInScreen extends StatefulWidget {
   @override

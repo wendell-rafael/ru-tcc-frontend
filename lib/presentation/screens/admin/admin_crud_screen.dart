@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/services/api_service.dart';
+import '../../../domain/services/api_service.dart';
 
 class AdminCrudScreen extends StatefulWidget {
   @override

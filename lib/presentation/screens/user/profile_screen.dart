@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:rutccc/presentation/screens/login_screen.dart';
 import 'package:intl/intl.dart';
-import '../../domain/services/favorito_service.dart';
+import '../../../domain/services/favorito_service.dart';
+import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../auth/login_screen.dart';
+import '../shared/alteracao_screen.dart';
 import 'admin_insghts_screen.dart';
-import 'alteracao_screen.dart';
-import 'login_screen.dart';
+
 
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({Key? key}) : super(key: key);

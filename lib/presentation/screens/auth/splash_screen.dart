@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'decision_screen.dart'; // Importa o widget de decisão
+import '../shared/decision_screen.dart'; // Importa o widget de decisão
 
 class SplashScreen extends StatefulWidget {
   @override

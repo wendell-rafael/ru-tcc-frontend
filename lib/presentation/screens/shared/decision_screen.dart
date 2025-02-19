@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'login_screen.dart';
-import 'home_screen.dart';
-import 'admin_screen.dart';
+
+import '../admin/admin_screen.dart';
+import '../auth/login_screen.dart';
+import '../user/home_screen.dart';
+
 
 class DecisionScreen extends StatelessWidget {
   Future<String?> _getUserRole(String uid) async {

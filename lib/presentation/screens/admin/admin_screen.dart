@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'cardapio_list_screen.dart';
-import 'admin_upload_csv_screen.dart';
+
+import '../cardapio/cardapio_list_screen.dart';
 import 'admin_settings_screen.dart';
+import 'admin_upload_csv_screen.dart';
+
 
 class AdminScreen extends StatefulWidget {
   @override

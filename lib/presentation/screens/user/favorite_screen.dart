@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
-import '../../domain/services/favorito_service.dart';
+import '../../../domain/services/favorito_service.dart';
 
 class FavoritesScreen extends StatefulWidget {
   @override
