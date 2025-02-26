@@ -5,7 +5,6 @@ import '../auth/login_screen.dart';
 import '../shared/alteracao_screen.dart';
 import 'admin_insghts_screen.dart';
 
-
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({Key? key}) : super(key: key);
 
@@ -22,7 +21,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDataFromFirestore(); // Carrega os dados dos usuários
+    _loadDataFromFirestore();
   }
 
   Future<void> _loadDataFromFirestore() async {
@@ -61,7 +60,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     }
   }
 
-  // Stream que observa a contagem de alterações no cardápio em tempo real.
+  /// Stream para observar a contagem de alterações no cardápio
   Stream<int> getCardapioChangesCountStream() {
     return FirebaseFirestore.instance
         .collection('cardapioChanges')
@@ -69,15 +68,61 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         .map((snapshot) => snapshot.size);
   }
 
+  /// Widget auxiliar para exibir um card de informação
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color iconColor,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: iconColor),
+        title: Text(title),
+        trailing: Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+      ),
+    );
+  }
+
+  /// Widget auxiliar para exibir o botão de logout
+  Widget _buildLogoutButton(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      onPressed: () async {
+        await FirebaseAuth.instance.signOut();
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false,
+        );
+      },
+      child: const Text(
+        'Sair',
+        style: TextStyle(fontSize: 18, color: Colors.white),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'Configurações',
-            style: TextStyle(color: Colors.white),
-          ),
+          title: const Text('Configurações',
+              style: TextStyle(color: Colors.white)),
           backgroundColor: const Color(0xFFE65100),
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -86,10 +131,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Configurações',
-          style: TextStyle(color: Colors.white),
-        ),
+        title:
+            const Text('Configurações', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFFE65100),
       ),
       body: SingleChildScrollView(
@@ -99,61 +142,34 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             const Icon(Icons.settings, size: 80, color: Colors.black),
             const SizedBox(height: 20),
 
-            // Alunos Cadastrados
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.group, color: Colors.deepOrange),
-                title: const Text('Alunos Cadastrados'),
-                trailing: Text(
-                  '$totalStudents',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ),
+            // Card: Alunos Cadastrados
+            _buildInfoCard(
+              icon: Icons.group,
+              title: 'Alunos Cadastrados',
+              value: '$totalStudents',
+              iconColor: Colors.deepOrange,
             ),
             const SizedBox(height: 12),
 
-            // Alunos Veganos
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.eco, color: Colors.green),
-                title: const Text('Alunos Veganos'),
-                trailing: Text(
-                  '$veganStudents',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ),
+            // Card: Alunos Veganos
+            _buildInfoCard(
+              icon: Icons.eco,
+              title: 'Alunos Veganos',
+              value: '$veganStudents',
+              iconColor: Colors.green,
             ),
             const SizedBox(height: 12),
 
-            // Alunos Vegetarianos
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.spa, color: Colors.lime),
-                title: const Text('Alunos Vegetarianos'),
-                trailing: Text(
-                  '$vegetarianStudents',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ),
+            // Card: Alunos Vegetarianos
+            _buildInfoCard(
+              icon: Icons.spa,
+              title: 'Alunos Vegetarianos',
+              value: '$vegetarianStudents',
+              iconColor: Colors.lime,
             ),
             const SizedBox(height: 12),
 
-            // Alterações no Cardápio (navega para AlteracoesScreen)
+            // Card: Alterações no Cardápio (navega para AlteracoesScreen)
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -194,7 +210,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            // Insights do Cardápio (navega para a tela de dashboard de insights)
+
+            // Card: Dashboard de Insights (navega para insights)
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -205,8 +222,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            const AdminDashboardInsightsScreen()),
+                        builder: (context) => AdminDashboardInsightsScreen()),
                   );
                 },
                 leading: const Icon(Icons.pie_chart, color: Colors.deepOrange),
@@ -218,28 +234,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             const SizedBox(height: 30),
 
             // Botão de Sair
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                  (route) => false,
-                );
-              },
-              child: const Text(
-                'Sair',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
-            ),
+            _buildLogoutButton(context),
           ],
         ),
       ),

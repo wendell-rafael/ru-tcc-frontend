@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
-
 import '../../../domain/services/favorito_service.dart';
+import '../../widgets/favorite_input_field.dart';
+import '../../widgets/favorite_card.dart';
+import '../../widgets/custom_button.dart';
 
 class FavoritesScreen extends StatefulWidget {
   @override
@@ -13,14 +13,13 @@ class FavoritesScreen extends StatefulWidget {
 class _FavoritesScreenState extends State<FavoritesScreen> {
   final TextEditingController _controller = TextEditingController();
   List<dynamic> _favorites = [];  // Lista de favoritos obtida do backend
-
-  final FavoriteService _favoriteService = FavoriteService(); // Instancia do serviço
+  final FavoriteService _favoriteService = FavoriteService(); // Instância do serviço
   String? usuarioId;  // ID do usuário
 
   @override
   void initState() {
     super.initState();
-    _getUsuarioId();  // Obtém o usuário ID do Firebase
+    _getUsuarioId();  // Obtém o UID do Firebase
   }
 
   // Função para pegar o UID do Firebase
@@ -136,32 +135,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             SizedBox(height: 12),
             Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Digite o nome do item...',
-                      hintStyle: TextStyle(color: Colors.white70),
-                      filled: true,
-                      fillColor: Color(0xFFE65100),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                  ),
-                ),
+                FavoriteInputField(controller: _controller),
                 SizedBox(width: 8),
-                ElevatedButton(
+                CustomButton(
+                  label: 'Adicionar',
                   onPressed: _addFavorite,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFE65100),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  ),
-                  child: Text('Adicionar', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                 ),
               ],
             ),
@@ -178,22 +157,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 itemCount: _favorites.length,
                 itemBuilder: (context, index) {
                   final favorite = _favorites[index];
-                  return Card(
-                    color: Color(0xFFE65100),
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: ListTile(
-                      title: Text(
-                        favorite['prato'],
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.delete, color: Colors.white),
-                        onPressed: () => _removeFavorite(favorite['id']),
-                        tooltip: 'Remover',
-                      ),
-                    ),
+                  return FavoriteCard(
+                    prato: favorite['prato'],
+                    id: favorite['id'],
+                    onRemove: () => _removeFavorite(favorite['id']),
                   );
                 },
               ),

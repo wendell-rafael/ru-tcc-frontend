@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:rutccc/data/models/cardapio.dart';
-import '../../../domain/services/cardapio_service.dart';
+import 'package:rutccc/domain/services/cardapio_service.dart';
+import 'package:rutccc/domain/controllers/cardapio_form_controller.dart';
 
 class CardapioFormScreen extends StatefulWidget {
   final Cardapio? cardapio;
@@ -14,8 +16,9 @@ class CardapioFormScreen extends StatefulWidget {
 class _CardapioFormScreenState extends State<CardapioFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final CardapioService _cardapioService = CardapioService();
+  final CardapioFormController _formController = CardapioFormController();
 
-  // Campos
+  // Campos do formulário
   late int dia;
   late String refeicao;
   String? opcao1, opcao2, opcaoVegana, opcaoVegetariana;
@@ -44,49 +47,9 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
     pao = widget.cardapio?.pao;
   }
 
-  // Função para calcular as diferenças entre o cardápio antigo e o novo
+  // Função para calcular as diferenças usando o controller
   Map<String, Map<String, dynamic>> _calcularDiferencas(Cardapio oldCardapio, Cardapio newCardapio) {
-    final Map<String, Map<String, dynamic>> diffs = {};
-    if (oldCardapio.opcao1 != newCardapio.opcao1) {
-      diffs['opcao1'] = {'old': oldCardapio.opcao1, 'new': newCardapio.opcao1};
-    }
-    if (oldCardapio.opcao2 != newCardapio.opcao2) {
-      diffs['opcao2'] = {'old': oldCardapio.opcao2, 'new': newCardapio.opcao2};
-    }
-    if (oldCardapio.opcaoVegana != newCardapio.opcaoVegana) {
-      diffs['opcaoVegana'] = {'old': oldCardapio.opcaoVegana, 'new': newCardapio.opcaoVegana};
-    }
-    if (oldCardapio.opcaoVegetariana != newCardapio.opcaoVegetariana) {
-      diffs['opcaoVegetariana'] = {'old': oldCardapio.opcaoVegetariana, 'new': newCardapio.opcaoVegetariana};
-    }
-    if (oldCardapio.salada1 != newCardapio.salada1) {
-      diffs['salada1'] = {'old': oldCardapio.salada1, 'new': newCardapio.salada1};
-    }
-    if (oldCardapio.salada2 != newCardapio.salada2) {
-      diffs['salada2'] = {'old': oldCardapio.salada2, 'new': newCardapio.salada2};
-    }
-    if (oldCardapio.guarnicao != newCardapio.guarnicao) {
-      diffs['guarnicao'] = {'old': oldCardapio.guarnicao, 'new': newCardapio.guarnicao};
-    }
-    if (oldCardapio.acompanhamento1 != newCardapio.acompanhamento1) {
-      diffs['acompanhamento1'] = {'old': oldCardapio.acompanhamento1, 'new': newCardapio.acompanhamento1};
-    }
-    if (oldCardapio.acompanhamento2 != newCardapio.acompanhamento2) {
-      diffs['acompanhamento2'] = {'old': oldCardapio.acompanhamento2, 'new': newCardapio.acompanhamento2};
-    }
-    if (oldCardapio.suco != newCardapio.suco) {
-      diffs['suco'] = {'old': oldCardapio.suco, 'new': newCardapio.suco};
-    }
-    if (oldCardapio.sobremesa != newCardapio.sobremesa) {
-      diffs['sobremesa'] = {'old': oldCardapio.sobremesa, 'new': newCardapio.sobremesa};
-    }
-    if (oldCardapio.cafe != newCardapio.cafe) {
-      diffs['cafe'] = {'old': oldCardapio.cafe, 'new': newCardapio.cafe};
-    }
-    if (oldCardapio.pao != newCardapio.pao) {
-      diffs['pao'] = {'old': oldCardapio.pao, 'new': newCardapio.pao};
-    }
-    return diffs;
+    return _formController.calcularDiferencas(oldCardapio, newCardapio);
   }
 
   Future<void> _saveCardapio() async {
@@ -116,7 +79,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
       try {
         if (widget.cardapio == null) {
           await _cardapioService.createCardapio(newCardapio);
-          // Opcional: registrar a criação como alteração
+          // Registra a criação como alteração
           await _cardapioService.registrarAlteracao(
             dia: newCardapio.dia,
             refeicao: newCardapio.refeicao,
@@ -161,8 +124,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
           labelText: label,
           hintText: 'Digite $label...',
           prefixIcon: icon != null ? Icon(icon, color: Colors.orange) : null,
-          labelStyle:
-          TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+          labelStyle: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.orange),
@@ -176,8 +138,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
         ),
         style: TextStyle(fontSize: 16),
         validator: isRequired
-            ? (value) =>
-        value == null || value.isEmpty ? 'Preencha $label' : null
+            ? (value) => value == null || value.isEmpty ? 'Preencha $label' : null
             : null,
         onChanged: onChanged,
       ),
@@ -193,8 +154,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
           labelText: 'Refeição',
           hintText: 'Selecione a refeição...',
           prefixIcon: Icon(Icons.restaurant_menu, color: Colors.orange),
-          labelStyle:
-          TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+          labelStyle: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.orange),
@@ -228,8 +188,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Text(
         title,
-        style: TextStyle(
-            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
       ),
     );
   }
@@ -264,8 +223,7 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
                 _buildTextField(
                   label: 'Dia',
                   initialValue: dia.toString(),
-                  onChanged: (value) =>
-                  dia = int.tryParse(value ?? '1') ?? 1,
+                  onChanged: (value) => dia = int.tryParse(value ?? '1') ?? 1,
                   isRequired: true,
                   icon: Icons.calendar_today,
                 ),

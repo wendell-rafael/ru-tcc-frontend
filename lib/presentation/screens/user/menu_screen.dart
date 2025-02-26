@@ -4,7 +4,10 @@ import 'package:rutccc/data/models/cardapio.dart';
 import 'package:rutccc/domain/services/cardapio_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-enum FilterOption { dia, semana, mes }
+// Importa o enum compartilhado
+import 'package:rutccc/core/enums.dart';
+import '../../widgets/cardapio_card.dart';
+import '../../widgets/filter_bar.dart';
 
 class MenuScreen extends StatefulWidget {
   @override
@@ -41,7 +44,6 @@ class _MenuScreenState extends State<MenuScreen> {
     _configureFCM();
   }
 
-  // Configura os listeners do Firebase Messaging
   void _configureFCM() {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     messaging.requestPermission();
@@ -56,7 +58,6 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   void _handleMessage(RemoteMessage message) {
-    // Se o payload indicar que o cardápio foi atualizado, atualiza a lista
     if (message.data['type'] == 'cardapio_updated') {
       _fetchCardapios();
     }
@@ -99,74 +100,6 @@ class _MenuScreenState extends State<MenuScreen> {
       _filteredCardapios = filtered;
       isLoading = false;
     });
-  }
-
-  Widget _buildFilterButton(String label, FilterOption option) {
-    bool isSelected = _selectedFilter == option;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedFilter = option;
-          });
-          _applyFilter();
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Color(0xFFE65100) : Colors.grey[300],
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildCategory({
-    required String title,
-    required Map<String?, String?> options,
-    required List<String> keys,
-  }) {
-    final List<Widget> items = keys.where((key) {
-      return options[key] != null && options[key]!.isNotEmpty;
-    }).map((key) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Row(
-          children: [
-            Icon(iconMap[key] ?? Icons.restaurant, color: Colors.white, size: 22),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                options[key]!,
-                style: TextStyle(fontSize: 16, color: Colors.white),
-                softWrap: true,
-              ),
-            ),
-          ],
-        ),
-      );
-    }).toList();
-
-    if (items.isEmpty) return [];
-    return [
-      Text(
-        title,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-      ),
-      SizedBox(height: 8),
-      ...items,
-      Divider(color: Colors.white, thickness: 1),
-    ];
   }
 
   void _showLegend(BuildContext context) {
@@ -232,10 +165,7 @@ class _MenuScreenState extends State<MenuScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Cardápio',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
+            Text('Cardápio', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
       ),
@@ -245,83 +175,30 @@ class _MenuScreenState extends State<MenuScreen> {
             ? Center(child: CircularProgressIndicator())
             : Column(
           children: [
-            // Filtro com botões
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  _buildFilterButton('Dia', FilterOption.dia),
-                  SizedBox(width: 8),
-                  _buildFilterButton('Semana', FilterOption.semana),
-                  SizedBox(width: 8),
-                  _buildFilterButton('Mês', FilterOption.mes),
-                ],
-              ),
+            // Utiliza o widget FilterBar para os botões de filtro
+            FilterBar(
+              selectedFilter: _selectedFilter,
+              onFilterChanged: (newFilter) {
+                setState(() {
+                  _selectedFilter = newFilter;
+                });
+                _applyFilter();
+              },
             ),
-            // Lista de Cardápios
             Expanded(
               child: _filteredCardapios.isEmpty
                   ? Center(
-                child: Text('Nenhum cardápio disponível para o filtro selecionado.',
-                    style: TextStyle(fontSize: 16, color: Colors.black54)),
+                child: Text(
+                  'Nenhum cardápio disponível para o filtro selecionado.',
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                ),
               )
                   : ListView.builder(
                 itemCount: _filteredCardapios.length,
                 itemBuilder: (context, index) {
-                  final c = _filteredCardapios[index];
-                  final options = {
-                    'Opção 1': c.opcao1,
-                    'Opção 2': c.opcao2,
-                    'Opção Vegana': c.opcaoVegana,
-                    'Opção Vegetariana': c.opcaoVegetariana,
-                    'Salada 1': c.salada1,
-                    'Salada 2': c.salada2,
-                    'Guarnição': c.guarnicao,
-                    'Acompanhamento 1': c.acompanhamento1,
-                    'Acompanhamento 2': c.acompanhamento2,
-                    'Suco': c.suco,
-                    'Sobremesa': c.sobremesa,
-                    'Café': c.cafe,
-                    'Pão': c.pao,
-                  };
-
-                  return Card(
-                    color: Color(0xFFE65100),
-                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${c.refeicao} - Dia ${c.dia}',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          Divider(color: Colors.white, thickness: 1),
-                          SizedBox(height: 8),
-                          ..._buildCategory(
-                            title: 'Pratos Principais',
-                            options: options,
-                            keys: ['Opção 1', 'Opção 2', 'Opção Vegana', 'Opção Vegetariana'],
-                          ),
-                          ..._buildCategory(
-                            title: 'Saladas',
-                            options: options,
-                            keys: ['Salada 1', 'Salada 2'],
-                          ),
-                          ..._buildCategory(
-                            title: 'Acompanhamentos',
-                            options: options,
-                            keys: ['Guarnição', 'Acompanhamento 1', 'Acompanhamento 2'],
-                          ),
-                          ..._buildCategory(
-                            title: 'Bebidas e Sobremesas',
-                            options: options,
-                            keys: ['Suco', 'Sobremesa', 'Café', 'Pão'],
-                          ),
-                        ],
-                      ),
-                    ),
+                  return CardapioCard(
+                    cardapio: _filteredCardapios[index],
+                    iconMap: iconMap,
                   );
                 },
               ),

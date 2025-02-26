@@ -1,19 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FavoriteService {
-  final String baseUrl = 'http://192.168.0.5:8000/favoritos'; // URL base do seu backend
+  final String baseUrl = '${dotenv.env['BASE_URL'] ?? 'http://192.168.0.5:8000'}/favoritos';
 
-  // Função para obter todos os favoritos de um usuário
   Future<List<dynamic>> getFavorites(String usuarioId) async {
     try {
       final url = Uri.parse('$baseUrl/$usuarioId');
       final response = await http.get(url);
 
-      // Garante que a resposta seja decodificada corretamente em UTF-8
       if (response.statusCode == 200) {
-        // Usa utf8.decode para garantir a codificação correta
         final decodedResponse = utf8.decode(response.bodyBytes);
         return jsonDecode(decodedResponse);
       } else {
@@ -25,10 +23,11 @@ class FavoriteService {
     }
   }
 
-  // Função para adicionar um favorito
   Future<void> addFavorite(String usuarioId, String prato) async {
     try {
-      final url = Uri.parse('$baseUrl/?usuario_id=$usuarioId&prato=${Uri.encodeComponent(prato)}');
+      final url = Uri.parse(
+        '$baseUrl/?usuario_id=$usuarioId&prato=${Uri.encodeComponent(prato)}',
+      );
       final response = await http.post(url);
       if (response.statusCode != 200) {
         throw Exception('Erro ao adicionar favorito');
@@ -39,7 +38,6 @@ class FavoriteService {
     }
   }
 
-  // Função para remover um favorito
   Future<void> removeFavorite(int id) async {
     try {
       final url = '$baseUrl/$id';

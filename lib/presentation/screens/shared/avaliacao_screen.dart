@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../user/menu_screen.dart'; // Certifique-se de que o caminho esteja correto
 
 class AvaliacaoScreen extends StatefulWidget {
   @override
@@ -9,12 +8,10 @@ class AvaliacaoScreen extends StatefulWidget {
 }
 
 class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
-  int? _avaliacao; // Número de estrelas selecionadas (1 a 5)
+  int? _avaliacao;
   final int _maxStars = 5;
-  String? _refeicao; // "Almoço" ou "Jantar"
-
-  // Usamos ToggleButtons para a seleção do turno
-  List<bool> _selectedMeal = [false, false]; // [Almoço, Jantar]
+  String? _refeicao;
+  List<bool> _selectedMeal = [false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +32,7 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
               ),
               SizedBox(height: 20),
 
-              // Linha de estrelas para avaliação
+              // Estrelas de avaliação
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
@@ -56,7 +53,7 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
               ),
               SizedBox(height: 20),
 
-              // Seção para selecionar se é Almoço ou Jantar usando ToggleButtons
+              // Seção de seleção do tipo de refeição
               Text(
                 "Selecione a refeição:",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -70,7 +67,6 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
                 isSelected: _selectedMeal,
                 onPressed: (int index) {
                   setState(() {
-                    // Permite apenas uma seleção
                     for (int i = 0; i < _selectedMeal.length; i++) {
                       _selectedMeal[i] = i == index;
                     }
@@ -90,7 +86,7 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
               ),
               SizedBox(height: 20),
 
-              // Botão de salvar avaliação
+              // Botão para salvar a avaliação
               ElevatedButton(
                 onPressed: (_avaliacao == null || _refeicao == null)
                     ? null
@@ -106,7 +102,6 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Avaliação registrada: $_avaliacao estrelas para $_refeicao")),
                   );
-                  // Após salvar, redireciona para a tela de cardápios
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -127,20 +122,21 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
     );
   }
 
-  // Função para salvar a avaliação no Firestore
+  // 🔥 Atualizado: Cada avaliação será salva como um **novo documento**
   Future<void> _salvarAvaliacao(String usuarioId, int avaliacao, String refeicao) async {
     try {
-      // Cria um ID composto para garantir uma avaliação única por turno
-      final docId = "${usuarioId}_$refeicao";
-      await FirebaseFirestore.instance.collection('avaliacoes').doc(docId).set({
+      DateTime now = DateTime.now();
+      String dataFormatada = "${now.year}-${now.month}-${now.day}"; // YYYY-MM-DD
+
+      await FirebaseFirestore.instance.collection('avaliacoes').add({
         'usuario_id': usuarioId,
         'avaliacao': avaliacao,
         'refeicao': refeicao,
-        'timestamp': FieldValue.serverTimestamp(),
+        'data': dataFormatada,
+        'timestamp': FieldValue.serverTimestamp(), // 🔥 Mantém a ordem correta no Firestore
       });
-      print("Avaliação salva com sucesso");
+
     } catch (e) {
-      print("Erro ao salvar a avaliação: $e");
     }
   }
 }

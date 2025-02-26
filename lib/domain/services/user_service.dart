@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../data/models/user.dart';
 
 class UserService {
-  final String baseUrl = 'http://192.168.0.5:8000';
+  final String baseUrl = dotenv.env['BASE_URL'] ?? 'valor_default';
 
   Future<String?> _getToken() async {
     return await FirebaseAuth.instance.currentUser?.getIdToken();

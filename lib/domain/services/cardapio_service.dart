@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rutccc/data/models/cardapio.dart';
@@ -7,7 +8,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 
 class CardapioService {
-  final String baseUrl = 'http://192.168.0.5:8000';
+  final String baseUrl = dotenv.env['BASE_URL'] ?? 'valor_default';
 
   Future<String?> _getToken() async {
     return await FirebaseAuth.instance.currentUser?.getIdToken();

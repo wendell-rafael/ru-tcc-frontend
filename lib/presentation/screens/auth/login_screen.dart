@@ -2,8 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rutccc/presentation/screens/auth/register_screen.dart';
-import '../admin/admin_screen.dart';
-import '../user/home_screen.dart';
+import 'package:rutccc/presentation/screens/admin/admin_screen.dart';
+import 'package:rutccc/presentation/screens/user/home_screen.dart';
+import 'package:rutccc/presentation/widgets/custom_text_field.dart';
+import 'package:rutccc/presentation/widgets/custom_password_field.dart';
+import 'package:rutccc/presentation/widgets/custom_button.dart';
+import '../../../domain/controllers/login_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -11,17 +15,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
   final _focusPassword = FocusNode();
 
   bool _isLoading = false;
-  bool _obscurePassword = true;
+
+  final LoginController _loginController = LoginController();
 
   Future<void> _loginWithEmailAndPassword() async {
     if (!_formKey.currentState!.validate()) return;
@@ -31,16 +32,13 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // 🔹 Faz login no FirebaseAuth
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      // Utiliza o LoginController para efetuar o login e obter o role
+      String userRole = await _loginController.login(
+        _emailController.text,
+        _passwordController.text,
       );
 
-      // 🔹 Busca a role no Firestore ANTES de redirecionar
-      String userRole = await _getUserRole(userCredential.user!.uid);
-
-      // 🔹 Direciona o usuário para a tela correta
+      // Direciona o usuário para a tela correta
       if (userRole == 'admin') {
         Navigator.pushReplacement(
           context,
@@ -58,7 +56,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } on FirebaseAuthException catch (e) {
       print('FirebaseAuthException: ${e.code}');
-
       String errorMessage = 'Erro ao fazer login';
       if (e.code == 'user-not-found') {
         errorMessage = 'Usuário não encontrado. Verifique o email.';
@@ -70,7 +67,6 @@ class _LoginScreenState extends State<LoginScreen> {
         errorMessage =
         'Credenciais inválidas. Verifique seus dados e tente novamente.';
       }
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
@@ -81,24 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  /// 🔥 **Busca a role do usuário no Firestore antes de redirecionar**
-  Future<String> _getUserRole(String uid) async {
-    DocumentSnapshot userDoc =
-    await _firestore.collection("users").doc(uid).get();
-
-    if (userDoc.exists && userDoc.data() != null) {
-      String role = (userDoc.data() as Map<String, dynamic>)["role"] ?? "user";
-      print("Role do usuário: $role"); // Debug para ver a role no console
-      return role;
-    }
-    return "user"; // Se não encontrar, assume que é usuário normal
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus(); // 🔥 Fecha o teclado ao tocar fora
+        FocusScope.of(context).unfocus(); // Fecha o teclado ao tocar fora
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -138,45 +121,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     SizedBox(height: 32),
-                    _buildInputField(
+                    CustomTextField(
                       label: 'Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      onFieldSubmitted: (_) {
-                        FocusScope.of(context).requestFocus(_focusPassword);
-                      },
+                      nextFocus: _focusPassword,
                     ),
-                    _buildPasswordField(
+                    CustomPasswordField(
                       label: 'Senha',
                       controller: _passwordController,
                       focusNode: _focusPassword,
                       textInputAction: TextInputAction.done,
                     ),
                     SizedBox(height: 24),
-                    if (_isLoading)
-                      CircularProgressIndicator()
-                    else
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFFE65100),
-                            padding: EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: _loginWithEmailAndPassword,
-                          child: Text(
-                            'Entrar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
+                    _isLoading
+                        ? CircularProgressIndicator()
+                        : CustomButton(
+                      label: 'Entrar',
+                      onPressed: _loginWithEmailAndPassword,
+                    ),
                     SizedBox(height: 16),
                     TextButton(
                       onPressed: () {
@@ -199,89 +163,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputField({
-    required String label,
-    required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
-    TextInputAction textInputAction = TextInputAction.next,
-    FocusNode? focusNode,
-    void Function(String)? onFieldSubmitted,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        textInputAction: textInputAction,
-        focusNode: focusNode,
-        onFieldSubmitted: onFieldSubmitted,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(color: Colors.black),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
-              color: Color(0xFFE65100),
-              width: 2,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPasswordField({
-    required String label,
-    required TextEditingController controller,
-    FocusNode? focusNode,
-    TextInputAction textInputAction = TextInputAction.done,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextFormField(
-        controller: controller,
-        obscureText: _obscurePassword,
-        focusNode: focusNode,
-        textInputAction: textInputAction,
-        onFieldSubmitted: (_) {
-          _loginWithEmailAndPassword();
-        },
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(color: Colors.black),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
-              color: Color(0xFFE65100),
-              width: 2,
-            ),
-          ),
-          suffixIcon: IconButton(
-            icon: Icon(
-              _obscurePassword ? Icons.visibility : Icons.visibility_off,
-              color: Colors.black,
-            ),
-            onPressed: () {
-              setState(() {
-                _obscurePassword = !_obscurePassword;
-              });
-            },
           ),
         ),
       ),

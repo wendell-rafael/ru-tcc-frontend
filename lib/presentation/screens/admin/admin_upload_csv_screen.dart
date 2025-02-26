@@ -6,7 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
-
+import '../../../domain/controllers/admin_upload_controller.dart';
 import '../../../domain/services/cardapio_service.dart';
 
 class AdminUploadCsvScreen extends StatefulWidget {
@@ -22,12 +22,7 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
   String? _downloadUrl;
 
   final CardapioService _cardapioService = CardapioService();
-
-  @override
-  void initState() {
-    super.initState();
-    tz.initializeTimeZones();
-  }
+  final AdminUploadController _uploadController = AdminUploadController();
 
   Future<void> _uploadFile() async {
     if (_selectedFile == null || _selectedFile!.path == null) {
@@ -41,29 +36,22 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
       _uploadProgress = 0.0;
     });
     try {
-      final File file = File(_selectedFile!.path!);
-      var saoPaulo = tz.getLocation('America/Sao_Paulo');
-      int month = tz.TZDateTime.now(saoPaulo).month;
-      String fileName = "cardapio-mes$month.csv";
-      String filePath = "uploads/csv/$fileName";
-      Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
-      UploadTask uploadTask = storageRef.putFile(file);
-      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        double progress = snapshot.bytesTransferred / snapshot.totalBytes;
-        setState(() {
-          _uploadProgress = progress;
-        });
-      });
-      TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
+      final String filePath = _selectedFile!.path!;
+
+      // Opcional: se você deseja acompanhar o progresso, pode criar um UploadTask aqui e escutar snapshotEvents.
+      // Para simplificar, chamamos o método do controller:
+      String downloadUrl = await _uploadController.uploadFile(filePath);
       setState(() {
         _downloadUrl = downloadUrl;
       });
-      await FirebaseFirestore.instance.collection('uploads').add({
-        'fileName': fileName,
-        'url': downloadUrl,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+
+      // Recalcule o fileName conforme a lógica do controller.
+      var saoPaulo = tz.getLocation('America/Sao_Paulo');
+      int month = tz.TZDateTime.now(saoPaulo).month;
+      String fileName = "cardapio-mes$month.csv";
+
+      await _uploadController.saveUploadMetadata(fileName, downloadUrl);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Arquivo enviado com sucesso: $fileName')),
       );
@@ -128,17 +116,13 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHelpItem('Selecionar Arquivo',
-                  'Escolha um arquivo CSV do seu dispositivo.'),
+              _buildHelpItem('Selecionar Arquivo', 'Escolha um arquivo CSV do seu dispositivo.'),
               SizedBox(height: 12),
-              _buildHelpItem('Enviar Arquivo',
-                  'Faz o upload do arquivo selecionado para o Firebase Storage.'),
+              _buildHelpItem('Enviar Arquivo', 'Faz o upload do arquivo selecionado para o Firebase Storage.'),
               SizedBox(height: 12),
-              _buildHelpItem('Importar Cardápio do Mês',
-                  'Busca e importa o cardápio do mês atual (arquivo nomeado como cardapio-mesX.csv) para o sistema.'),
+              _buildHelpItem('Importar Cardápio do Mês', 'Busca e importa o cardápio do mês atual (arquivo nomeado como cardapio-mesX.csv) para o sistema.'),
               SizedBox(height: 12),
-              _buildHelpItem('Progresso',
-                  'O indicador de progresso mostra a porcentagem de upload em tempo real.'),
+              _buildHelpItem('Progresso', 'O indicador de progresso mostra a porcentagem de upload em tempo real.'),
             ],
           ),
         ),
@@ -159,8 +143,7 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
     return RichText(
       text: TextSpan(
         text: '• $title: ',
-        style: TextStyle(
-            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
         children: [
           TextSpan(
             text: description,
@@ -204,8 +187,7 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -222,8 +204,7 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
                   SizedBox(height: 32),
                   ElevatedButton.icon(
                     style: buttonStyle.copyWith(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.orange)),
+                        backgroundColor: MaterialStateProperty.all(Colors.orange)),
                     onPressed: _pickFile,
                     icon: Icon(Icons.attach_file),
                     label: Text(
@@ -234,49 +215,44 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
                   SizedBox(height: 16),
                   _selectedFileName != null
                       ? Text(
-                          'Arquivo selecionado: $_selectedFileName',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        )
+                    'Arquivo selecionado: $_selectedFileName',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  )
                       : Text(
-                          'Nenhum arquivo selecionado',
-                          style:
-                              TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
+                    'Nenhum arquivo selecionado',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
                   SizedBox(height: 24),
                   _isUploading
                       ? Column(
-                          children: [
-                            LinearProgressIndicator(
-                              value: _uploadProgress,
-                              backgroundColor: Colors.grey[300],
-                              color: Colors.orange,
-                              minHeight: 8,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              '${(_uploadProgress * 100).toStringAsFixed(0)}%',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                          ],
-                        )
+                    children: [
+                      LinearProgressIndicator(
+                        value: _uploadProgress,
+                        backgroundColor: Colors.grey[300],
+                        color: Colors.orange,
+                        minHeight: 8,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                    ],
+                  )
                       : ElevatedButton.icon(
-                          style: buttonStyle.copyWith(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.green)),
-                          onPressed: _uploadFile,
-                          icon: Icon(Icons.cloud_upload),
-                          label: Text(
-                            'Enviar Arquivo',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
+                    style: buttonStyle.copyWith(
+                        backgroundColor: MaterialStateProperty.all(Colors.green)),
+                    onPressed: _uploadFile,
+                    icon: Icon(Icons.cloud_upload),
+                    label: Text(
+                      'Enviar Arquivo',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
                   SizedBox(height: 24),
                   ElevatedButton.icon(
                     style: buttonStyle.copyWith(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.blue)),
+                        backgroundColor: MaterialStateProperty.all(Colors.blue)),
                     onPressed: _importMonthlyCardapio,
                     icon: Icon(Icons.download),
                     label: Text(
