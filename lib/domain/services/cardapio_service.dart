@@ -21,7 +21,6 @@ class CardapioService {
     return data.map((e) => Cardapio.fromJson(e)).toList();
   }
 
-  // 📌 GET: Listar todos os cardápios
   Future<List<Cardapio>> getCardapios() async {
     final token = await _getToken();
     final response = await http.get(
@@ -38,7 +37,6 @@ class CardapioService {
     }
   }
 
-  // 📌 GET: Obter Cardápio por ID
   Future<Cardapio> getCardapioById(int id) async {
     final token = await _getToken();
     final response = await http.get(
@@ -56,7 +54,6 @@ class CardapioService {
     }
   }
 
-  // 📌 POST: Criar novo cardápio
   Future<void> createCardapio(Cardapio cardapio) async {
     final token = await _getToken();
     final response = await http.post(
@@ -72,7 +69,6 @@ class CardapioService {
     }
   }
 
-  // 📌 PUT: Atualizar cardápio
   Future<void> updateCardapio(int id, Cardapio cardapio) async {
     final token = await _getToken();
     final response = await http.put(
@@ -88,7 +84,6 @@ class CardapioService {
     }
   }
 
-  // 📌 PATCH: Atualizar parcialmente
   Future<void> patchCardapio(int id, Map<String, dynamic> updates) async {
     final token = await _getToken();
     final response = await http.patch(

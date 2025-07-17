@@ -26,7 +26,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _fetchLastCheckin();
   }
 
-  // Busca a quantidade de favoritos via FavoriteService
   Future<void> _fetchFavoritesCount() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -41,7 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Busca o último check-in do usuário via Firestore
   Future<void> _fetchLastCheckin() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -80,7 +78,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final gravatarUrl = user != null ? _getGravatarUrl(user.email!) : null;
-    // Se não houver gravatar, usa o ícone account_circle
     final displayPhotoUrl = gravatarUrl;
     final userName = user?.displayName ?? 'Usuário';
     final userEmail = user?.email ?? 'Email não disponível';
@@ -111,7 +108,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Cabeçalho com informações do usuário
             Container(
               width: double.infinity,
               color: Color(0xFFE65100),
@@ -152,7 +148,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             SizedBox(height: 12),
-            // Card com informações adicionais da conta
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(
@@ -190,7 +185,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             SizedBox(height: 12),
-            // Botão de sair
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: SizedBox(

@@ -44,7 +44,6 @@ class RegisterController extends ChangeNotifier {
 
       await userCredential.user!.updateDisplayName(name.trim());
 
-      // Define se o usuário é admin ou user
       String role = (email == "admin@ru.com") ? "admin" : "user";
 
       await _firestore.collection('users').doc(userCredential.user!.uid).set({

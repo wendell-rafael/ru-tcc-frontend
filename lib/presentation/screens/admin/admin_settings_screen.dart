@@ -5,7 +5,6 @@ import '../auth/login_screen.dart';
 import '../shared/alteracao_screen.dart';
 import 'admin_insghts_screen.dart';
 
-
 class AdminSettingsScreen extends StatefulWidget {
   const AdminSettingsScreen({super.key});
 
@@ -22,25 +21,22 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDataFromFirestore(); // Carrega os dados dos usuários
+    _loadDataFromFirestore();
   }
 
   Future<void> _loadDataFromFirestore() async {
     try {
       final firestore = FirebaseFirestore.instance;
 
-      // 1. Total de usuários
       final totalSnapshot = await firestore.collection('users').get();
       final totalCount = totalSnapshot.size;
 
-      // 2. Usuários Veganos
       final veganSnapshot = await firestore
           .collection('users')
           .where('dietaryRestriction', isEqualTo: 'Vegano')
           .get();
       final veganCount = veganSnapshot.size;
 
-      // 3. Usuários Vegetarianos
       final vegetarianSnapshot = await firestore
           .collection('users')
           .where('dietaryRestriction', isEqualTo: 'Vegetariano')
@@ -61,7 +57,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     }
   }
 
-  // Stream que observa a contagem de alterações no cardápio em tempo real.
   Stream<int> getCardapioChangesCountStream() {
     return FirebaseFirestore.instance
         .collection('cardapioChanges')
@@ -98,8 +93,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           children: [
             const Icon(Icons.settings, size: 80, color: Colors.black),
             const SizedBox(height: 20),
-
-            // Alunos Cadastrados
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -116,8 +109,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Alunos Veganos
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -134,8 +125,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Alunos Vegetarianos
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -152,8 +141,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Alterações no Cardápio (navega para AlteracoesScreen)
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -194,7 +181,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            // Insights do Cardápio (navega para a tela de dashboard de insights)
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -214,10 +200,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 trailing: const Icon(Icons.arrow_forward_ios),
               ),
             ),
-
             const SizedBox(height: 30),
-
-            // Botão de Sair
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

@@ -33,7 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus(); // 🔥 Fecha o teclado ao tocar fora
+        FocusScope.of(context).unfocus();
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -44,9 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           iconTheme: IconThemeData(color: Colors.black),
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.white,
-            // Mantém o fundo branco mesmo ao rolar
-            statusBarIconBrightness:
-                Brightness.dark, // Ícones pretos na barra de status
+            statusBarIconBrightness: Brightness.dark,
           ),
         ),
         body: Padding(
@@ -112,7 +110,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       SnackBar(content: Text(errorMessage)),
                                     );
                                   } else {
-                                    // Redireciona automaticamente para HomeScreen ao concluir cadastro
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
@@ -128,7 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
                           ),
-                    SizedBox(height: 24), // Espaço extra abaixo do botão
+                    SizedBox(height: 24),
                   ],
                 ),
               ),

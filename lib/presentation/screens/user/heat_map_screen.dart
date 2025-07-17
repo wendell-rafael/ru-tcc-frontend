@@ -75,7 +75,6 @@ class _HeatMapScreenState extends State<HeatMapScreen> {
       dinnerCounts[formatter.format(dt)] = 0;
     }
 
-    // Agrupa cada check-in no intervalo correspondente
     for (var doc in snapshot.docs) {
       Timestamp ts = doc.get('timestamp');
       DateTime checkinTime = ts.toDate();

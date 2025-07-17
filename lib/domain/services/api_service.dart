@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ApiService {
-  // URL padrão (sem uso de .env)
   final String baseUrl = 'http://192.168.0.5:8000';
 
   Future<String?> _getToken() async {

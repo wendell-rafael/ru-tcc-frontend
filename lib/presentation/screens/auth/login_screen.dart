@@ -33,16 +33,13 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // 🔹 Faz login no FirebaseAuth
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // 🔹 Busca a role no Firestore ANTES de redirecionar
       String userRole = await _getUserRole(userCredential.user!.uid);
 
-      // 🔹 Direciona o usuário para a tela correta
       if (userRole == 'admin') {
         Navigator.pushReplacement(
           context,
@@ -83,24 +80,22 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  /// 🔥 **Busca a role do usuário no Firestore antes de redirecionar**
   Future<String> _getUserRole(String uid) async {
     DocumentSnapshot userDoc =
     await _firestore.collection("users").doc(uid).get();
 
     if (userDoc.exists && userDoc.data() != null) {
       String role = (userDoc.data() as Map<String, dynamic>)["role"] ?? "user";
-      print("Role do usuário: $role"); // Debug para ver a role no console
       return role;
     }
-    return "user"; // Se não encontrar, assume que é usuário normal
+    return "user";
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus(); // 🔥 Fecha o teclado ao tocar fora
+        FocusScope.of(context).unfocus();
       },
       child: Scaffold(
         backgroundColor: Colors.white,

@@ -13,7 +13,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Aguarda 3 segundos e navega para a tela que decide (admin ou usuário)
     Timer(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
@@ -30,7 +29,6 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Aqui você pode colocar seu logo, por exemplo, um SVG ou imagem
             Image.asset('assets/images/logo.png', width: 150, height: 150),
             SizedBox(height: 20),
             CircularProgressIndicator(

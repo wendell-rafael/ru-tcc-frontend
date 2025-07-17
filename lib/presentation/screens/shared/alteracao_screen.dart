@@ -10,7 +10,6 @@ class AlteracoesScreen extends StatefulWidget {
 }
 
 class _AlteracoesScreenState extends State<AlteracoesScreen> {
-  // 0 representa "Todos"
   int selectedMonth = 0;
 
   final List<Map<String, dynamic>> monthOptions = [
@@ -33,7 +32,6 @@ class _AlteracoesScreenState extends State<AlteracoesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Cores padrão
     const Color orangeColor = Color(0xFFE65100);
 
     return Scaffold(
@@ -43,7 +41,6 @@ class _AlteracoesScreenState extends State<AlteracoesScreen> {
       ),
       body: Column(
         children: [
-          // Filtro de mês com visual aprimorado
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Container(
@@ -105,7 +102,6 @@ class _AlteracoesScreenState extends State<AlteracoesScreen> {
                       child: Text("Nenhuma alteração registrada."));
                 }
                 final docs = snapshot.data!.docs;
-                // Filtra os documentos pelo mês, se não estiver selecionado "Todos"
                 final filteredDocs = selectedMonth == 0
                     ? docs
                     : docs.where((doc) {

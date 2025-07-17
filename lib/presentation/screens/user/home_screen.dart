@@ -16,10 +16,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController(initialPage: 0);
 
   static final List<Widget> _widgetOptions = <Widget>[
-    MenuScreen(), // Tela de Menu
-    FavoritesScreen(), // Tela
-    CheckInScreen(), // Nova Tela de Check-in// de Favoritos
-    ProfileScreen(), // Tela de Perfil
+    MenuScreen(),
+    FavoritesScreen(),
+    CheckInScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -64,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Favoritos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.check_circle), // Ícone do check-in
-            label: 'Check-in', // Rótulo do check-in
+            icon: Icon(Icons.check_circle),
+            label: 'Check-in',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Color(0xFFE65100),
         onTap: _onItemTapped,
         type: BottomNavigationBarType
-            .fixed, // Fixando o tipo para garantir que todos os ícones apareçam
+            .fixed,
       ),
     );
   }

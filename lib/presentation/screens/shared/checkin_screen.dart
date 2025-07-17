@@ -15,7 +15,6 @@ class CheckInScreen extends StatefulWidget {
 class _CheckInScreenState extends State<CheckInScreen> {
   bool isCheckedIn = false;
 
-  // Função para fazer check-in
   Future<void> _checkIn() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -41,7 +40,6 @@ class _CheckInScreenState extends State<CheckInScreen> {
     });
   }
 
-  // Função para fazer check-out e redirecionar para a tela de avaliação
   Future<void> _checkOut() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -71,7 +69,6 @@ class _CheckInScreenState extends State<CheckInScreen> {
     });
   }
 
-  // Função para navegar até o mapa de calor de check-ins
   void _openHeatMap() {
     Navigator.push(
       context,

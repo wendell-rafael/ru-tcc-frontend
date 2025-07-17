@@ -42,7 +42,6 @@ class _MenuScreenState extends State<MenuScreen> {
     _configureFCM();
   }
 
-  // Configura os listeners do Firebase Messaging
   void _configureFCM() {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     messaging.requestPermission();
@@ -57,7 +56,6 @@ class _MenuScreenState extends State<MenuScreen> {
   }
 
   void _handleMessage(RemoteMessage message) {
-    // Se o payload indicar que o cardápio foi atualizado, atualiza a lista
     if (message.data['type'] == 'cardapio_updated') {
       _fetchCardapios();
     }
@@ -246,7 +244,6 @@ class _MenuScreenState extends State<MenuScreen> {
             ? Center(child: CircularProgressIndicator())
             : Column(
           children: [
-            // Filtro com botões
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -259,7 +256,6 @@ class _MenuScreenState extends State<MenuScreen> {
                 ],
               ),
             ),
-            // Lista de Cardápios
             Expanded(
               child: _filteredCardapios.isEmpty
                   ? Center(

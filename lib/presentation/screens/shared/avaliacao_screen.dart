@@ -11,12 +11,11 @@ class AvaliacaoScreen extends StatefulWidget {
 }
 
 class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
-  int? _avaliacao; // Número de estrelas selecionadas (1 a 5)
+  int? _avaliacao;
   final int _maxStars = 5;
-  String? _refeicao; // "Almoço" ou "Jantar"
+  String? _refeicao;
 
-  // Usamos ToggleButtons para a seleção do turno
-  final List<bool> _selectedMeal = [false, false]; // [Almoço, Jantar]
+  final List<bool> _selectedMeal = [false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +36,6 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
               ),
               SizedBox(height: 20),
 
-              // Linha de estrelas para avaliação
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
@@ -58,7 +56,6 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
               ),
               SizedBox(height: 20),
 
-              // Seção para selecionar se é Almoço ou Jantar usando ToggleButtons
               Text(
                 "Selecione a refeição:",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -72,7 +69,6 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
                 isSelected: _selectedMeal,
                 onPressed: (int index) {
                   setState(() {
-                    // Permite apenas uma seleção
                     for (int i = 0; i < _selectedMeal.length; i++) {
                       _selectedMeal[i] = i == index;
                     }
@@ -92,7 +88,6 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
               ),
               SizedBox(height: 20),
 
-              // Botão de salvar avaliação
               ElevatedButton(
                 onPressed: (_avaliacao == null || _refeicao == null)
                     ? null
@@ -108,7 +103,6 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Avaliação registrada: $_avaliacao estrelas para $_refeicao")),
                   );
-                  // Após salvar, redireciona para a tela de cardápios
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -129,10 +123,8 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
     );
   }
 
-  // Função para salvar a avaliação no Firestore
   Future<void> _salvarAvaliacao(String usuarioId, int avaliacao, String refeicao) async {
     try {
-      // Cria um ID composto para garantir uma avaliação única por turno
       final docId = "${usuarioId}_$refeicao";
       await FirebaseFirestore.instance.collection('avaliacoes').doc(docId).set({
         'usuario_id': usuarioId,

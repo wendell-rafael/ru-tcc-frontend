@@ -15,7 +15,6 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final CardapioService _cardapioService = CardapioService();
 
-  // Campos
   late int dia;
   late String refeicao;
   String? opcao1, opcao2, opcaoVegana, opcaoVegetariana;
@@ -26,7 +25,6 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
   @override
   void initState() {
     super.initState();
-    // Preenche com valores existentes ou padrões
     dia = widget.cardapio?.dia ?? DateTime.now().day;
     refeicao = widget.cardapio?.refeicao ?? 'Almoço';
     opcao1 = widget.cardapio?.opcao1;
@@ -44,7 +42,6 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
     pao = widget.cardapio?.pao;
   }
 
-  // Função para calcular as diferenças entre o cardápio antigo e o novo
   Map<String, Map<String, dynamic>> _calcularDiferencas(Cardapio oldCardapio, Cardapio newCardapio) {
     final Map<String, Map<String, dynamic>> diffs = {};
     if (oldCardapio.opcao1 != newCardapio.opcao1) {
@@ -116,7 +113,6 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
       try {
         if (widget.cardapio == null) {
           await _cardapioService.createCardapio(newCardapio);
-          // Opcional: registrar a criação como alteração
           await _cardapioService.registrarAlteracao(
             dia: newCardapio.dia,
             refeicao: newCardapio.refeicao,
@@ -126,7 +122,6 @@ class _CardapioFormScreenState extends State<CardapioFormScreen> {
           );
         } else {
           await _cardapioService.updateCardapio(widget.cardapio!.id, newCardapio);
-          // Calcula as diferenças e registra se houver alterações
           final diff = _calcularDiferencas(widget.cardapio!, newCardapio);
           if (diff.isNotEmpty) {
             await _cardapioService.registrarAlteracao(

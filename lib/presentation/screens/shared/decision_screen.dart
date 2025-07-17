@@ -6,13 +6,12 @@ import '../admin/admin_screen.dart';
 import '../auth/login_screen.dart';
 import '../user/home_screen.dart';
 
-
 class DecisionScreen extends StatelessWidget {
   const DecisionScreen({super.key});
 
   Future<String?> _getUserRole(String uid) async {
     DocumentSnapshot userDoc =
-    await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
     if (userDoc.exists && userDoc.data() != null) {
       return (userDoc.data() as Map<String, dynamic>)["role"];
     }
@@ -32,16 +31,17 @@ class DecisionScreen extends StatelessWidget {
             future: _getUserRole(snapshot.data!.uid),
             builder: (context, roleSnapshot) {
               if (roleSnapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(body: Center(child: CircularProgressIndicator()));
+                return Scaffold(
+                    body: Center(child: CircularProgressIndicator()));
               }
               if (roleSnapshot.hasData && roleSnapshot.data == "admin") {
-                return AdminScreen(); // Tela de admin
+                return AdminScreen();
               }
-              return HomeScreen(); // Tela de usuário normal
+              return HomeScreen();
             },
           );
         }
-        return LoginScreen(); // Tela de login para usuários não autenticados
+        return LoginScreen();
       },
     );
   }

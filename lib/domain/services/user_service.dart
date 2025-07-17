@@ -11,7 +11,6 @@ class UserService {
     return await FirebaseAuth.instance.currentUser?.getIdToken();
   }
 
-  // 📌 GET - Listar Usuários
   Future<List<UserNormal>> getUsers() async {
     final token = await _getToken();
     final response = await http.get(
@@ -26,7 +25,6 @@ class UserService {
     }
   }
 
-  // 📌 GET - Obter Usuário por ID
   Future<UserNormal> getUserById(String id) async {
     final token = await _getToken();
     final response = await http.get(
@@ -40,7 +38,6 @@ class UserService {
     }
   }
 
-  // 📌 POST - Criar Usuário
   Future<void> createUser(UserNormal user) async {
     final token = await _getToken();
     final response = await http.post(
@@ -56,7 +53,6 @@ class UserService {
     }
   }
 
-  // 📌 PUT - Atualizar Usuário
   Future<void> updateUser(String id, UserNormal user) async {
     final token = await _getToken();
     final response = await http.put(
@@ -72,7 +68,6 @@ class UserService {
     }
   }
 
-  // 📌 DELETE - Remover Usuário
   Future<void> deleteUser(String id) async {
     final token = await _getToken();
     final response = await http.delete(

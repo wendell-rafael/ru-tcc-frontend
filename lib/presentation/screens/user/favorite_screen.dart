@@ -12,15 +12,15 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   final TextEditingController _controller = TextEditingController();
-  List<dynamic> _favorites = [];  // Lista de favoritos obtida do backend
+  List<dynamic> _favorites = [];
 
-  final FavoriteService _favoriteService = FavoriteService(); // Instancia do serviço
-  String? usuarioId;  // ID do usuário
+  final FavoriteService _favoriteService = FavoriteService();
+  String? usuarioId;
 
   @override
   void initState() {
     super.initState();
-    _getUsuarioId();  // Obtém o usuário ID do Firebase
+    _getUsuarioId();
   }
 
   // Função para pegar o UID do Firebase
@@ -29,16 +29,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         setState(() {
-          usuarioId = user.uid;  // Define o UID do usuário
+          usuarioId = user.uid;
         });
-        _loadFavorites();  // Carrega os favoritos após obter o UID
+        _loadFavorites();
       }
     } catch (e) {
       print('Erro ao obter o usuarioId: $e');
     }
   }
 
-  // Busca os favoritos do usuário no backend
+
   Future<void> _loadFavorites() async {
     if (usuarioId == null) return;
 
@@ -52,7 +52,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
-  // Adiciona um favorito chamando o backend
   Future<void> _addFavorite() async {
     final text = _controller.text.trim();
 
@@ -88,7 +87,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
-  // Remove um favorito chamando o backend
   Future<void> _removeFavorite(int id) async {
     try {
       await _favoriteService.removeFavorite(id);

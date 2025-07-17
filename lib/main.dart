@@ -38,7 +38,6 @@ class MyApp extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
-            // Ajuste aqui para manter a status bar vermelha
             systemOverlayStyle: SystemUiOverlayStyle(
               statusBarColor: Color(0xFFE65100),
               statusBarIconBrightness: Brightness.light,
@@ -54,7 +53,7 @@ class MyApp extends StatelessWidget {
             selectionHandleColor: Colors.black,
           ),
         ),
-        home: SplashScreen(), // Tela inicial
+        home: SplashScreen(),
       ),
     );
   }

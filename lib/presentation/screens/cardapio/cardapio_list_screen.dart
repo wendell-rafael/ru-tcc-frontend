@@ -186,7 +186,6 @@ class _CardapioListScreenState extends State<CardapioListScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Filtro
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
@@ -199,7 +198,6 @@ class _CardapioListScreenState extends State<CardapioListScreen> {
                     ],
                   ),
                 ),
-                // Lista de Cardápios
                 Expanded(
                   child: cardapios.isEmpty
                       ? Center(
