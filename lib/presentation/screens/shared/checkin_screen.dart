@@ -6,6 +6,8 @@ import 'package:rutccc/presentation/screens/shared/avaliacao_screen.dart';
 import '../user/heat_map_screen.dart';
 
 class CheckInScreen extends StatefulWidget {
+  const CheckInScreen({super.key});
+
   @override
   _CheckInScreenState createState() => _CheckInScreenState();
 }

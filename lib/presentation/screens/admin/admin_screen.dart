@@ -6,6 +6,8 @@ import 'admin_upload_csv_screen.dart';
 
 
 class AdminScreen extends StatefulWidget {
+  const AdminScreen({super.key});
+
   @override
   _AdminScreenState createState() => _AdminScreenState();
 }
@@ -43,8 +45,8 @@ class _AdminScreenState extends State<AdminScreen> {
       body: PageView(
         controller: _pageController,
         physics: BouncingScrollPhysics(),
-        children: _widgetOptions,
         onPageChanged: _onPageChanged,
+        children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[

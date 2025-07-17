@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -10,6 +9,8 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import '../../../domain/services/cardapio_service.dart';
 
 class AdminUploadCsvScreen extends StatefulWidget {
+  const AdminUploadCsvScreen({super.key});
+
   @override
   _AdminUploadCsvScreenState createState() => _AdminUploadCsvScreenState();
 }
@@ -223,7 +224,7 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
                   ElevatedButton.icon(
                     style: buttonStyle.copyWith(
                         backgroundColor:
-                            MaterialStateProperty.all(Colors.orange)),
+                            WidgetStateProperty.all(Colors.orange)),
                     onPressed: _pickFile,
                     icon: Icon(Icons.attach_file),
                     label: Text(
@@ -264,7 +265,7 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
                       : ElevatedButton.icon(
                           style: buttonStyle.copyWith(
                               backgroundColor:
-                                  MaterialStateProperty.all(Colors.green)),
+                                  WidgetStateProperty.all(Colors.green)),
                           onPressed: _uploadFile,
                           icon: Icon(Icons.cloud_upload),
                           label: Text(
@@ -276,7 +277,7 @@ class _AdminUploadCsvScreenState extends State<AdminUploadCsvScreen> {
                   ElevatedButton.icon(
                     style: buttonStyle.copyWith(
                         backgroundColor:
-                            MaterialStateProperty.all(Colors.blue)),
+                            WidgetStateProperty.all(Colors.blue)),
                     onPressed: _importMonthlyCardapio,
                     icon: Icon(Icons.download),
                     label: Text(

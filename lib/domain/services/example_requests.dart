@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:rutccc/data/models/cardapio.dart';
 import 'package:rutccc/data/models/favorito.dart';
 import 'dart:convert';

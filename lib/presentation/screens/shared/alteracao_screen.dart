@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Para formatação de datas
 
 class AlteracoesScreen extends StatefulWidget {
-  const AlteracoesScreen({Key? key}) : super(key: key);
+  const AlteracoesScreen({super.key});
 
   @override
   _AlteracoesScreenState createState() => _AlteracoesScreenState();
@@ -207,7 +207,7 @@ class _AlteracoesScreenState extends State<AlteracoesScreen> {
                                   ],
                                 ),
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),

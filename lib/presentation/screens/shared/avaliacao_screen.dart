@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../user/menu_screen.dart'; // Certifique-se de que o caminho esteja correto
+// Certifique-se de que o caminho esteja correto
 
 class AvaliacaoScreen extends StatefulWidget {
+  const AvaliacaoScreen({super.key});
+
   @override
   _AvaliacaoScreenState createState() => _AvaliacaoScreenState();
 }
@@ -14,7 +16,7 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
   String? _refeicao; // "Almoço" ou "Jantar"
 
   // Usamos ToggleButtons para a seleção do turno
-  List<bool> _selectedMeal = [false, false]; // [Almoço, Jantar]
+  final List<bool> _selectedMeal = [false, false]; // [Almoço, Jantar]
 
   @override
   Widget build(BuildContext context) {

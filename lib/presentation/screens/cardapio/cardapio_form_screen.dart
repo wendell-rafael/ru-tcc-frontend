@@ -5,7 +5,7 @@ import '../../../domain/services/cardapio_service.dart';
 class CardapioFormScreen extends StatefulWidget {
   final Cardapio? cardapio;
 
-  const CardapioFormScreen({Key? key, this.cardapio}) : super(key: key);
+  const CardapioFormScreen({super.key, this.cardapio});
 
   @override
   _CardapioFormScreenState createState() => _CardapioFormScreenState();

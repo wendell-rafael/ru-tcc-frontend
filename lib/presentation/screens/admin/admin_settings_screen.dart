@@ -7,7 +7,7 @@ import 'admin_insghts_screen.dart';
 
 
 class AdminSettingsScreen extends StatefulWidget {
-  const AdminSettingsScreen({Key? key}) : super(key: key);
+  const AdminSettingsScreen({super.key});
 
   @override
   State<AdminSettingsScreen> createState() => _AdminSettingsScreenState();

@@ -3,6 +3,8 @@ import 'dart:async';
 import '../shared/decision_screen.dart'; // Importa o widget de decisão
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }

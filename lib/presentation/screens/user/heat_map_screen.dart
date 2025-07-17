@@ -6,10 +6,13 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 class IntervalData {
   final String intervalLabel;
   final int count;
+
   IntervalData({required this.intervalLabel, required this.count});
 }
 
 class HeatMapScreen extends StatefulWidget {
+  const HeatMapScreen({super.key});
+
   @override
   _HeatMapScreenState createState() => _HeatMapScreenState();
 }
@@ -90,7 +93,8 @@ class _HeatMapScreenState extends State<HeatMapScreen> {
       }
       // Jantar
       if (checkinTime.isAfter(DateTime(now.year, now.month, now.day, 17, 0)) &&
-          checkinTime.isBefore(DateTime(now.year, now.month, now.day, 19, 30))) {
+          checkinTime
+              .isBefore(DateTime(now.year, now.month, now.day, 19, 30))) {
         for (var dt in dinnerList) {
           DateTime intervalEnd = dt.add(Duration(minutes: 20));
           if (!checkinTime.isBefore(dt) && checkinTime.isBefore(intervalEnd)) {
@@ -110,7 +114,8 @@ class _HeatMapScreenState extends State<HeatMapScreen> {
         return timeA.compareTo(timeB);
       });
     for (var key in lunchKeys) {
-      lunchResults.add(IntervalData(intervalLabel: key, count: lunchCounts[key]!));
+      lunchResults
+          .add(IntervalData(intervalLabel: key, count: lunchCounts[key]!));
     }
 
     List<IntervalData> dinnerResults = [];
@@ -121,7 +126,8 @@ class _HeatMapScreenState extends State<HeatMapScreen> {
         return timeA.compareTo(timeB);
       });
     for (var key in dinnerKeys) {
-      dinnerResults.add(IntervalData(intervalLabel: key, count: dinnerCounts[key]!));
+      dinnerResults
+          .add(IntervalData(intervalLabel: key, count: dinnerCounts[key]!));
     }
 
     setState(() {
@@ -148,21 +154,12 @@ class _HeatMapScreenState extends State<HeatMapScreen> {
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFE65100))),
         SizedBox(height: 8),
-        Container(
+        SizedBox(
           height: 250,
           child: SfCartesianChart(
             primaryXAxis: CategoryAxis(),
             primaryYAxis: NumericAxis(minimum: 0, interval: 1),
             tooltipBehavior: TooltipBehavior(enable: true),
-            series: <ChartSeries>[
-              ColumnSeries<IntervalData, String>(
-                dataSource: data,
-                xValueMapper: (IntervalData d, _) => d.intervalLabel,
-                yValueMapper: (IntervalData d, _) => d.count,
-                pointColorMapper: (IntervalData d, _) => getColor(d.count),
-                dataLabelSettings: DataLabelSettings(isVisible: true),
-              )
-            ],
           ),
         ),
       ],

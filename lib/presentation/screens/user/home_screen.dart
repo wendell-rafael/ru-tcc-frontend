@@ -5,6 +5,8 @@ import 'favorite_screen.dart';
 import 'menu_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -48,8 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        children: _widgetOptions,
         onPageChanged: _onPageChanged,
+        children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[

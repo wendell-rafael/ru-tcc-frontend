@@ -1,15 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'presentation/screens/auth/login_screen.dart';
-import 'presentation/screens/user/home_screen.dart';
-import 'presentation/screens/admin/admin_screen.dart'; // Tela de admin
+// Tela de admin
 import 'presentation/screens/auth/splash_screen.dart'; // Tela de splash
 import 'domain/controllers/register_controller.dart';
 import 'package:timezone/data/latest_all.dart' as tz;

@@ -8,6 +8,8 @@ import '../../../domain/services/favorito_service.dart';
 import '../auth/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }

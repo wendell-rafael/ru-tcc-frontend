@@ -8,6 +8,8 @@ import '../user/home_screen.dart';
 
 
 class DecisionScreen extends StatelessWidget {
+  const DecisionScreen({super.key});
+
   Future<String?> _getUserRole(String uid) async {
     DocumentSnapshot userDoc =
     await FirebaseFirestore.instance.collection('users').doc(uid).get();

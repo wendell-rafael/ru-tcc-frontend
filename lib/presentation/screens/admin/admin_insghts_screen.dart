@@ -21,7 +21,7 @@ class ChartData {
 }
 
 class AdminDashboardInsightsScreen extends StatefulWidget {
-  const AdminDashboardInsightsScreen({Key? key}) : super(key: key);
+  const AdminDashboardInsightsScreen({super.key});
 
   @override
   _AdminDashboardInsightsScreenState createState() =>
@@ -63,7 +63,7 @@ class _AdminDashboardInsightsScreenState
     await FirebaseFirestore.instance.collection('cardapioChanges').get();
     final Map<String, int> counts = {};
     for (var doc in snapshot.docs) {
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
       final changes = data['changes'] as Map<String, dynamic>? ?? {};
       for (var key in changes.keys) {
         counts[key] = (counts[key] ?? 0) + 1;
@@ -82,7 +82,7 @@ class _AdminDashboardInsightsScreenState
     await FirebaseFirestore.instance.collection('cardapioChanges').get();
     final Map<String, int> counts = {};
     for (var doc in snapshot.docs) {
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data();
       // Supondo que o documento possua um campo "refeicao"
       final refeicao = data['refeicao'] as String? ?? 'Indefinido';
       counts[refeicao] = (counts[refeicao] ?? 0) + 1;
@@ -155,15 +155,6 @@ class _AdminDashboardInsightsScreenState
                 labelStyle: const TextStyle(fontSize: 10),
               ),
               tooltipBehavior: TooltipBehavior(enable: true),
-              series: <ChartSeries>[
-                ColumnSeries<ChartData, String>(
-                  dataSource: chartData,
-                  xValueMapper: (ChartData data, _) => data.label,
-                  yValueMapper: (ChartData data, _) => data.value,
-                  dataLabelSettings: const DataLabelSettings(isVisible: true),
-                  color: orangeColor,
-                )
-              ],
             );
           },
         );

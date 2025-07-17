@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../domain/services/api_service.dart';
 
 class AdminCrudScreen extends StatefulWidget {
+  const AdminCrudScreen({super.key});
+
   @override
   _AdminCrudScreenState createState() => _AdminCrudScreenState();
 }

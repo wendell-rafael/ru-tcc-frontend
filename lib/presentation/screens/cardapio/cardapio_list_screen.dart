@@ -8,6 +8,8 @@ import 'cardapio_form_screen.dart';
 enum FilterOption { dia, semana, mes }
 
 class CardapioListScreen extends StatefulWidget {
+  const CardapioListScreen({super.key});
+
   @override
   _CardapioListScreenState createState() => _CardapioListScreenState();
 }
